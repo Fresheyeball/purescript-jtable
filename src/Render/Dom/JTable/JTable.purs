@@ -18,13 +18,13 @@ data JSemantic = Integral
 
 type Level = Number
 
--- JPath??
+type JPath = [String]
 
--- data ColumnOrdering = InOrdering | CustomOrdering (JPath -> JPath -> Ordering)
+data ColumnOrdering = InOrdering | CustomOrdering (JPath -> JPath -> Ordering)
 
-data TableStyle =
-TableStyle {
+data TableStyle = TableStyle {
   table   :: Level -> Markup -> Markup,
   cell    :: JSemantic -> Markup -> Markup,
---  head    :: JPath -> Markup -> Markup,
-  row     :: Markup -> Markup }
+  head    :: JPath -> Markup -> Markup,
+  row     :: Markup -> Markup
+}
