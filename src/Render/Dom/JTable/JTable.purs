@@ -1,5 +1,6 @@
 module Render.Dom.JTable where
 
+import Data.Argonaut.Core (Json())
 import Data.Argonaut.Decode (DecodeJson)
 import Data.Argonaut.JCursor 
 import Data.Argonaut
@@ -26,16 +27,32 @@ data TableStyle = TableStyle {
 foldJTree :: forall a. (String -> a -> a) -> a -> JTree -> a
 foldJTree f i (JMap sm) = fold (\i' _ v -> foldJTree f i' v) i sm
 
-foldJsonToJTree :: Data.Argonaut.Core.Json -> JTree
-foldJsonToJTree j | isNull    j = j # show >>> JLeaf
-                  | isBoolean j = j # show >>> JLeaf
-                  | isNumber  j = j # show >>> JLeaf
-                  | isString  j = j # show >>> JLeaf
-                  | isArray   j = j # foldJsonArray  []    ((<$>) foldJsonToJTree) >>> JList
-                  | isObject  j = j # foldJsonObject empty ((<$>) foldJsonToJTree) >>> JMap                  
+instance eqJTree :: Eq JTree where
+  (==) (JMap  sm) (JMap  sm') = sm == sm'
+  (==) (JList ts) (JList ts') = ts == ts'
+  (==) (JLeaf s ) (JLeaf s' ) = s  == s'
+  (==) _          _           = false 
+  (/=) x y = not $ x == y
+
+foldJsonToJTree :: Json -> JTree
+foldJsonToJTree = go
+  where
+  jLeaf = show >>> JLeaf
+  go j | isNull    j = jLeaf j
+       | isBoolean j = jLeaf j
+       | isNumber  j = jLeaf j
+       | isString  j = jLeaf j
+       | isArray   j = j # foldJsonArray  []    ((<$>) go) >>> JList
+       | isObject  j = j # foldJsonObject empty ((<$>) go) >>> JMap
 
 
--- foldJsonToJTree = foldJson (const $ JLeaf "") (show >>> JLeaf) (show >>> JLeaf) JLeaf ((<$>) foldJsonToJTree >>> JList) ((<$>) foldJsonToJTree >>> JMap)
+-- foldJsonToJTree = foldJson 
+--                   (const $ JLeaf "") 
+--                   (show >>> JLeaf) 
+--                   (show >>> JLeaf) 
+--                   JLeaf 
+--                   ((<$>) foldJsonToJTree >>> JList) 
+--                   ((<$>) foldJsonToJTree >>> JMap)
 
 instance decodeJTree :: DecodeJson JTree where
   decodeJson = Right <<< foldJsonToJTree

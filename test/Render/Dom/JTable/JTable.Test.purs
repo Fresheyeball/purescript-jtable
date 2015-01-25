@@ -2,7 +2,13 @@ module Render.Dom.JTable.Test where
 
 import Data.Argonaut
 import Data.Either
+import Data.StrMap
+import Data.Foldable (foldr)
 import Test.Unit
+import qualified Test.StrongCheck as SC
+import Test.StrongCheck.Perturb
+import Test.StrongCheck.Gen
+import Debug.Trace
 import Debug.Foreign
 
 import Render.Dom.JTable
@@ -32,7 +38,19 @@ sampleJson = """
 --   p <- decodeJson sampleJson
 --   assert p ==
 
--- decodedSample :: Either String JTree
--- decodedSample = jsonParser sampleJson >>= decodeJson
+newtype TestStrMap a = TestStrMap (StrMap a)
 
-main = fprint $ jsonParser sampleJson
+decodedSample :: Either String JTree
+decodedSample = jsonParser sampleJson >>= decodeJson
+
+instance arbJTree :: (SC.Arbitrary a) => SC.Arbitrary (TestStrMap a) where
+  arbitrary = TestStrMap <$> do
+    n  <- SC.arbitrary
+    ks <- SC.arbitrary
+    return $ foldr (\k sm -> insert k n sm) empty ks
+
+main = do 
+  trace "JTree test start"
+
+  trace "eq"
+  SC.quickCheck \a -> a == (a :: StrMap)
