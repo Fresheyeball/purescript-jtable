@@ -43,14 +43,23 @@ newtype TestStrMap a = TestStrMap (StrMap a)
 decodedSample :: Either String JTree
 decodedSample = jsonParser sampleJson >>= decodeJson
 
-instance arbJTree :: (SC.Arbitrary a) => SC.Arbitrary (TestStrMap a) where
-  arbitrary = TestStrMap <$> do
+instance arbStrMap :: (SC.Arbitrary a) => SC.Arbitrary (StrMap a) where
+  arbitrary = do
     n  <- SC.arbitrary
     ks <- SC.arbitrary
-    return $ foldr (\k sm -> insert k n sm) empty ks
+    return $ foldr (\k sm -> insert k n sm) empty (ks :: [String])
+
+instance arbJTree :: SC.Arbitrary JTree where
+  arbitrary = chooseInt 0 2 >>= \n -> case n of 
+    0 -> JLeaf <$> SC.arbitrary
+    1 -> JList <$> SC.arbitrary
+    2 -> JMap  <$> SC.arbitrary
+
+checkEq :: StrMap Number -> Boolean
+checkEq sn = sn == sn
 
 main = do 
   trace "JTree test start"
 
   trace "eq"
-  SC.quickCheck \a -> a == (a :: StrMap)
+  SC.smallCheck checkEq
