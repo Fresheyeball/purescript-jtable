@@ -1,6 +1,12 @@
 module Render.Dom.JTable where
 
-import Data.Argonaut.Core (Json())
+import Data.Argonaut.Core ( Json()
+                          , JString()
+                          , JNumber()
+                          , JNull()
+                          , JBoolean()
+                          , JArray()
+                          , JObject() )
 import Data.Argonaut.Decode (DecodeJson)
 import Data.Argonaut.JCursor 
 import Data.Argonaut
@@ -9,32 +15,52 @@ import Data.Maybe
 import Data.StrMap
 import Data.Tuple
 import Data.Foldable (foldr)
+import Data.Array.Unsafe (head)
 import Text.Smolder.Markup
 
 type Level = Number
 
-data JTree = JMap (StrMap JTree) | JList [JTree] | JLeaf String
+data JSemantic = JSString  JString 
+               | JSNumber  JNumber 
+               | JSBoolean JBoolean 
+               | JSArray   JArray 
+               | JSObject  JObject 
+               | JSNull    JNull
 
-data ColumnOrdering = M | CustomOrdering (JCursor -> JCursor -> Ordering)
+data JTree = JMap (StrMap JTree) 
+           | JList [JTree] 
+           | JLeaf JSemantic
 
-data TableStyle = TableStyle {
-  table   :: Level -> Markup -> Markup,
-  cell    :: forall a. a -> Markup -> Markup,
-  head    :: JCursor -> Markup -> Markup,
-  row     :: Markup -> Markup
-}
+foldJTree :: forall a. (JSemantic -> a -> a) -> a -> JTree -> a
+foldJTree f i = go where    
+  go (JMap  sm) = fold  (\i' _ b  -> foldJTree f i' b) i sm
+  go (JList ts) = foldr (\b    i' -> foldJTree f i' b) i ts
+  go (JLeaf s ) = f s i
 
-foldJTree :: forall a. (String -> a -> a) -> a -> JTree -> a
-foldJTree f i = go
-  where    
-    go (JMap  sm) = fold  (\i' _ b  -> foldJTree f i' b) i sm
-    go (JList ts) = foldr (\b    i' -> foldJTree f i' b) i ts
-    go (JLeaf s ) = f s i
+(/+) :: forall a. (Show a) => String -> a -> String 
+(/+) x a = x ++ " (" ++ show a ++ ")"
+
+instance showJSemantic :: Show JSemantic where
+  show (JSString  a) = "JSString"  /+ a
+  show (JSNumber  a) = "JSNumber"  /+ a
+  show (JSBoolean a) = "JSBoolean" /+ a
+  show (JSArray   a) = "JSArray"   /+ a
+  show (JSObject  a) = "JSObject"  /+ a
+  show (JSNull    a) = "JSNull"    /+ a
+
+instance eqJSemantic :: Eq JSemantic where
+  (==) (JSString  a) (JSString  a') = a == a'
+  (==) (JSNumber  a) (JSNumber  a') = a == a'
+  (==) (JSBoolean a) (JSBoolean a') = a == a'
+  (==) (JSArray   a) (JSArray   a') = a == a'
+  (==) (JSObject  a) (JSObject  a') = a == a'
+  (==) (JSNull    a) (JSNull    a') = a == a'
+  (/=) x y = not $ x == y
 
 instance showJTree :: Show JTree where
-  show (JMap  sm) = "JMap (" ++ show sm ++ ")"
-  show (JList ts) = "JList (" ++ show ts ++ ")"
-  show (JLeaf s ) = "JLeaf \"" ++ s ++ "\""
+  show (JMap  sm) = "JMap"  /+ sm
+  show (JList ts) = "JList" /+ ts
+  show (JLeaf s ) = "JLeaf" /+ s
 
 instance eqJTree :: Eq JTree where
   (==) (JMap  sm) (JMap  sm') = sm == sm'
@@ -43,16 +69,22 @@ instance eqJTree :: Eq JTree where
   (==) _          _           = false 
   (/=) x y = not $ x == y
 
-foldJsonToJTree :: Json -> JTree
-foldJsonToJTree = go
+type JFold f a = f a -> (a -> f a) -> Json -> f a
+
+parseToJTree :: Json -> JTree
+parseToJTree = go
+  
   where
-  jLeaf = show >>> JLeaf
-  go j | isNull    j = jLeaf j
-       | isBoolean j = jLeaf j
-       | isNumber  j = jLeaf j
-       | isString  j = jLeaf j
+  
+  intoLeaf :: forall a. JFold [] a -> (a -> JSemantic) -> Json -> JTree
+  intoLeaf f c = f [] (\x -> [x]) >>> head >>> c >>> JLeaf
+
+  go j | isNull    j = j # foldJsonNull    `intoLeaf` JSNull
+       | isBoolean j = j # foldJsonBoolean `intoLeaf` JSBoolean
+       | isNumber  j = j # foldJsonNumber  `intoLeaf` JSNumber
+       | isString  j = j # foldJsonString  `intoLeaf` JSString
        | isArray   j = j # foldJsonArray  []    ((<$>) go) >>> JList
        | isObject  j = j # foldJsonObject empty ((<$>) go) >>> JMap
 
 instance decodeJTree :: DecodeJson JTree where
-  decodeJson = Right <<< foldJsonToJTree
+  decodeJson = Right <<< parseToJTree
