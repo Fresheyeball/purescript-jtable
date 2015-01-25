@@ -7,6 +7,7 @@ import Data.Either
 import Data.Maybe
 import Data.StrMap
 import Data.Tuple
+import Data.Foldable (foldr)
 import Text.Smolder.Markup
 
 type Level = Number
@@ -22,14 +23,19 @@ data TableStyle = TableStyle {
   row     :: Markup -> Markup
 }
 
+foldJTree :: forall a. (String -> a -> a) -> a -> JTree -> a
+foldJTree f i (JMap sm) = fold (\i' _ v -> foldJTree f i' v) i sm
+
 foldJsonToJTree :: Data.Argonaut.Core.Json -> JTree
-foldJsonToJTree = let
-    null    = const (JLeaf "") -- null
-    boolean = show >>> JLeaf   -- boolean  
-    number  = show >>> JLeaf   -- number 
-    string  = JLeaf            -- string   ↙array                            ↙object
-  in foldJson null boolean number string ((<$>) foldJsonToJTree >>> JList) ((<$>) foldJsonToJTree >>> JMap)
-  -- what gives? http://lpaste.net/119159
+foldJsonToJTree j | isNull    j = j # show >>> JLeaf
+                  | isBoolean j = j # show >>> JLeaf
+                  | isNumber  j = j # show >>> JLeaf
+                  | isString  j = j # show >>> JLeaf
+                  | isArray   j = j # foldJsonArray  []    ((<$>) foldJsonToJTree) >>> JList
+                  | isObject  j = j # foldJsonObject empty ((<$>) foldJsonToJTree) >>> JMap                  
+
+
+-- foldJsonToJTree = foldJson (const $ JLeaf "") (show >>> JLeaf) (show >>> JLeaf) JLeaf ((<$>) foldJsonToJTree >>> JList) ((<$>) foldJsonToJTree >>> JMap)
 
 instance decodeJTree :: DecodeJson JTree where
   decodeJson = Right <<< foldJsonToJTree

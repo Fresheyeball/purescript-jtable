@@ -75,8 +75,10 @@ gulp.task('make', function() {
 });
 
 gulp.task('test', function() {
-    var src = [paths.src, paths.test].concat(paths.bowerSrc);
-    compile(purescript.psc, src, options.test).pipe(run('node').exec());
+    var src = [paths.src, paths.test].concat(paths.bowerSrc),
+        c   = compile(purescript.psc, src, options.test);
+        c.pipe(run('node').exec());
+        c.pipe(gulp.dest("tmp/out.js"));
     gulp.src(src).pipe(purescript.dotPsci());
 });
 

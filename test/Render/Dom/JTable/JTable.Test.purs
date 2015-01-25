@@ -1,9 +1,9 @@
 module Render.Dom.JTable.Test where
 
 import Data.Argonaut
-import qualified Test.StrongCheck as S 
-import Debug.Trace
+import Data.Either
 import Test.Unit
+import Debug.Foreign
 
 import Render.Dom.JTable
 
@@ -32,6 +32,7 @@ sampleJson = """
 --   p <- decodeJson sampleJson
 --   assert p ==
 
+-- decodedSample :: Either String JTree
+-- decodedSample = jsonParser sampleJson >>= decodeJson
 
-main = do 
-  trace "json parses generically"
+main = fprint $ jsonParser sampleJson
