@@ -4,8 +4,7 @@ var gulp        = require('gulp')
   , purescript  = require('gulp-purescript')
   , run         = require('gulp-run')
   , runSequence = require('run-sequence')
-  , jsValidate  = require('gulp-jsvalidate')
-  ;
+  , jsValidate  = require('gulp-jsvalidate');
 
 var paths = {
     src: 'src/**/*.purs',
@@ -55,30 +54,32 @@ function docs (target) {
         return gulp.src(paths.docs[target].src)
             .pipe(docgen)
             .pipe(gulp.dest(paths.docs[target].dest));
-    }
+    };
 }
 
 function sequence () {
     var args = [].slice.apply(arguments);
     return function() {
         runSequence.apply(null, args);
-    }
+    };
 }
 
 gulp.task('browser', function() {
     return compile(purescript.psc, [paths.src].concat(paths.bowerSrc), {})
-        .pipe(gulp.dest('example'))
+        .pipe(gulp.dest('example'));
 });
 
 gulp.task('make', function() {
     return compile(purescript.pscMake, [paths.src].concat(paths.bowerSrc), {})
-        .pipe(gulp.dest(paths.dest))
+        .pipe(gulp.dest(paths.dest));
 });
 
 gulp.task('test', function() {
-
-    compile(purescript.psc, [paths.src, paths.test].concat(paths.bowerSrc), options.test)
-        .pipe(run('node').exec());
+    var src = [paths.src, paths.test].concat(paths.bowerSrc),
+        c   = compile(purescript.psc, src, options.test);
+        c.pipe(run('node').exec());
+        c.pipe(gulp.dest("tmp/out.js"));
+    gulp.src(src).pipe(purescript.dotPsci());
 });
 
 gulp.task('docs', docs('all'));
