@@ -25,7 +25,16 @@ data TableStyle = TableStyle {
 }
 
 foldJTree :: forall a. (String -> a -> a) -> a -> JTree -> a
-foldJTree f i (JMap sm) = fold (\i' _ v -> foldJTree f i' v) i sm
+foldJTree f i = go
+  where    
+    go (JMap  sm) = fold  (\i' _ b  -> foldJTree f i' b) i sm
+    go (JList ts) = foldr (\b    i' -> foldJTree f i' b) i ts
+    go (JLeaf s ) = f s i
+
+instance showJTree :: Show JTree where
+  show (JMap  sm) = "JMap (" ++ show sm ++ ")"
+  show (JList ts) = "JList (" ++ show ts ++ ")"
+  show (JLeaf s ) = "JLeaf \"" ++ s ++ "\""
 
 instance eqJTree :: Eq JTree where
   (==) (JMap  sm) (JMap  sm') = sm == sm'
@@ -44,15 +53,6 @@ foldJsonToJTree = go
        | isString  j = jLeaf j
        | isArray   j = j # foldJsonArray  []    ((<$>) go) >>> JList
        | isObject  j = j # foldJsonObject empty ((<$>) go) >>> JMap
-
-
--- foldJsonToJTree = foldJson 
---                   (const $ JLeaf "") 
---                   (show >>> JLeaf) 
---                   (show >>> JLeaf) 
---                   JLeaf 
---                   ((<$>) foldJsonToJTree >>> JList) 
---                   ((<$>) foldJsonToJTree >>> JMap)
 
 instance decodeJTree :: DecodeJson JTree where
   decodeJson = Right <<< foldJsonToJTree
