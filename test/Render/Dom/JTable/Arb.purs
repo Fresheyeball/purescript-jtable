@@ -10,7 +10,9 @@ import Data.Argonaut.Core ( JString()
                           , JObject() )
 import Data.StrMap
 import Data.Foldable (foldr)
+
 import Render.Dom.JTable
+import Render.Dom.JTable.Types
 
 upTo :: forall f. (Monad f) => Number -> GenT f Number
 upTo = chooseInt 0

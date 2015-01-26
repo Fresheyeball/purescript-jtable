@@ -10,6 +10,7 @@ import Debug.Trace
 import Debug.Foreign
 
 import Render.Dom.JTable
+import Render.Dom.JTable.Types
 import Render.Dom.JTable.Test.Arb
 
 sampleJson = """
