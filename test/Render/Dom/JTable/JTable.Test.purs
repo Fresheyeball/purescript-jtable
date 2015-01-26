@@ -1,6 +1,13 @@
 module Render.Dom.JTable.Test where
 
 import Data.Argonaut
+import Data.Argonaut.Core ( Json()
+                          , JString()
+                          , JNumber()
+                          , JNull()
+                          , JBoolean()
+                          , JArray()
+                          , JObject() )
 import Data.Either
 import Data.StrMap
 
@@ -34,25 +41,25 @@ sampleJson = """
 """ :: String
 
 sampleJTree = JMap m
-  where  
-  m  = empty 
-    # insert "userId"     ( JLeaf "8927524"    )
-    >>> insert "profile"  ( JMap  profile      )
-    >>> insert "comments" ( JList comments     )
-  profile = empty 
-    #   insert "name"     ( JLeaf "\"Mary Jane\""  ) 
-    >>> insert "age"      ( JLeaf "29"         )
-    >>> insert "gender"   ( JLeaf "\"female\""     )
+  where
+  m  = empty
+    # insert "userId"     ( JLeaf (JSNumber 8927524)     )
+    >>> insert "profile"  ( JMap  profile                )
+    >>> insert "comments" ( JList comments               )
+  profile = empty
+    #   insert "name"     ( JLeaf (JSString "Mary Jane") )
+    >>> insert "age"      ( JLeaf (JSNumber 29)          )
+    >>> insert "gender"   ( JLeaf (JSString "female")    )
   comments = [JMap c0, JMap c1]
   c0 = empty
-    #   insert "id"       ( JLeaf "\"F2372BAC\""   )
-    >>> insert "text"     ( JLeaf "\"I concur.\""  )
-    >>> insert "replyTo"  ( JList [JLeaf "9817361", JLeaf "\"F8ACD164F\""])
-    >>> insert "time"     ( JLeaf "\"2015-02-03\"" )
+    #   insert "id"       ( JLeaf (JSString "F2372BAC")  )
+    >>> insert "text"     ( JLeaf (JSString "I concur.") )
+    >>> insert "replyTo"  ( JList [JLeaf (JSNumber 9817361), JLeaf (JSString "F8ACD164F") ])
+    >>> insert "time"     ( JLeaf (JSString "2015-02-03"))
   c1 = empty
-    #   insert "id"       ( JLeaf "\"GH732AFC\""   )
-    >>> insert "replyTo"  ( JList [JLeaf "9654726", JLeaf "\"A44124F\""])
-    >>> insert "time"     ( JLeaf "\"2015-03-01\"" )
+    #   insert "id"       ( JLeaf (JSString "GH732AFC")  )
+    >>> insert "replyTo"  ( JList [JLeaf (JSNumber 9654726), JLeaf (JSString "A44124F")   ])
+    >>> insert "time"     ( JLeaf (JSString "2015-03-01"))
 
 jsonEqJTree :: String -> JTree -> Boolean
 jsonEqJTree x y = case jsonParser x >>= decodeJson of
@@ -62,7 +69,7 @@ jsonEqJTree x y = case jsonParser x >>= decodeJson of
 checkEq :: JTree -> Boolean
 checkEq x = x == x && not (x /= x)
 
-main = do 
+main = do
   trace "JTree test start"
 
   trace "eq"
