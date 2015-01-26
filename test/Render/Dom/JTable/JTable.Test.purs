@@ -1,13 +1,6 @@
 module Render.Dom.JTable.Test where
 
 import Data.Argonaut
-import Data.Argonaut.Core ( Json()
-                          , JString()
-                          , JNumber()
-                          , JNull()
-                          , JBoolean()
-                          , JArray()
-                          , JObject() )
 import Data.Either
 import Data.StrMap
 
@@ -42,7 +35,7 @@ sampleJson = """
 
 sampleJTree = JMap m
   where
-  m  = empty
+  m = empty
     #   insert "userId"   ( JLeaf (JSNumber 8927524)      )
     >>> insert "profile"  ( JMap  profile                 )
     >>> insert "comments" ( JList comments                )
@@ -61,6 +54,23 @@ sampleJTree = JMap m
     >>> insert "replyTo"  ( JList [JLeaf (JSNumber 9654726), JLeaf (JSString "A44124F")   ])
     >>> insert "time"     ( JLeaf (JSString "2015-03-01") )
 
+allLeafTypesString = """
+  {
+    "its a me"        : "Mario!",
+    "i am "           : 30,
+    "years old"       : false,
+    "you believe me?" : null
+  }
+""" :: String
+
+allLeafTypesTree = JMap m
+  where
+  m = empty
+    #   insert "its a me"        ( JLeaf (JSString  "Mario!") )
+    >>> insert "i am "           ( JLeaf (JSNumber  30)       )
+    >>> insert "years old"       ( JLeaf (JSBoolean false)    )
+    >>> insert "you believe me?" ( JLeaf (JSNull    jnull)    )
+
 jsonEqJTree :: String -> JTree -> Boolean
 jsonEqJTree x y = case jsonParser x >>= decodeJson of
   Left  _     -> false
@@ -70,16 +80,21 @@ checkEq :: forall a. (Eq a) => a -> Boolean
 checkEq x = (x == x)
      && not (x /= x)
 
+section = trace <<< (++) "\n" <<< flip (++) "\n"
+
 main = do
-  trace "JSemantic test start"
+  section "JSemantic test start"
 
   trace "eq of JSemantic"
   quickCheck' 10 (checkEq :: JSemantic -> Boolean)
 
-  trace "JTree test start"
+  section "JTree test start"
 
   trace "eq of JTree"
   quickCheck' 10 (checkEq :: JTree -> Boolean)
 
   trace "sampleJson matches sampleJTree"
   assert $ jsonEqJTree sampleJson sampleJTree
+
+  trace "all json types parse"
+  assert $ jsonEqJTree allLeafTypesString allLeafTypesTree

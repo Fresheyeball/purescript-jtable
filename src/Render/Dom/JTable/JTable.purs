@@ -49,7 +49,7 @@ instance eqJSemantic :: Eq JSemantic where
   (==) (JSNumber  a) (JSNumber  a') = a == a'
   (==) (JSBoolean a) (JSBoolean a') = a == a'
   (==) (JSNull    a) (JSNull    a') = a == a'
-  (==) _             _              = false 
+  (==) _             _              = false
   (/=) x y = not $ x == y
 
 instance showJTree :: Show JTree where
