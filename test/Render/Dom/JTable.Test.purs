@@ -11,7 +11,6 @@ import Debug.Trace
 import Debug.Foreign
 
 import Render.Dom.JTable
-import Render.Dom.JTable.Types
 import Render.Dom.JTable.Test.Arb
 
 sampleJson = """
@@ -35,48 +34,35 @@ sampleJson = """
 }
 """ :: String
 
-sampleJTree = JMap m
-  where
-  m = empty
-    #   insert "userId"   ( JLeaf (JSNumber 8927524)      )
-    >>> insert "profile"  ( JMap  profile                 )
-    >>> insert "comments" ( JList comments                )
-  profile = empty
-    #   insert "name"     ( JLeaf (JSString "Mary Jane")  )
-    >>> insert "age"      ( JLeaf (JSNumber 29)           )
-    >>> insert "gender"   ( JLeaf (JSString "female")     )
-  comments = [JMap c0, JMap c1]
-  c0 = empty
-    #   insert "id"       ( JLeaf (JSString "F2372BAC")   )
-    >>> insert "text"     ( JLeaf (JSString "I concur.")  )
-    >>> insert "replyTo"  ( JList [JLeaf (JSNumber 9817361), JLeaf (JSString "F8ACD164F") ])
-    >>> insert "time"     ( JLeaf (JSString "2015-02-03") )
-  c1 = empty
-    #   insert "id"       ( JLeaf (JSString "GH732AFC")   )
-    >>> insert "replyTo"  ( JList [JLeaf (JSNumber 9654726), JLeaf (JSString "A44124F")   ])
-    >>> insert "time"     ( JLeaf (JSString "2015-03-01") )
+-- ([Tuple (JField userId   (JCursorTop))                                              (8927524),
+--   Tuple (JField profile  (JField name   (JCursorTop)))                              (\"Mary Jane\"),
+--   Tuple (JField profile  (JField age    (JCursorTop)))                              (29),
+--   Tuple (JField profile  (JField gender (JCursorTop)))                              (\"female\"),
+--   Tuple (JField comments (JIndex 0      (JField id      (JCursorTop))))             (\"F2372BAC\"),
+--   Tuple (JField comments (JIndex 0      (JField text    (JCursorTop))))             (\"I concur.\"),
+--   Tuple (JField comments (JIndex 0      (JField replyTo (JIndex 0 (JCursorTop)))))  (9817361),
+--   Tuple (JField comments (JIndex 0      (JField replyTo (JIndex 1 (JCursorTop)))))  (\"F8ACD164F\"),
+--   Tuple (JField comments (JIndex 0      (JField time    (JCursorTop))))             (\"2015-02-03\"),
+--   Tuple (JField comments (JIndex 1      (JField id      (JCursorTop))))             (\"GH732AFC\"),
+--   Tuple (JField comments (JIndex 1      (JField replyTo (JIndex 0 (JCursorTop)))))  (9654726),
+--   Tuple (JField comments (JIndex 1      (JField replyTo (JIndex 1 (JCursorTop)))))  (\"A44124F\"),
+--   Tuple (JField comments (JIndex 1      (JField time    (JCursorTop))))             (\"2015-03-01\")])
 
-allLeafTypesString = """
-  {
-    "its a me"        : "Mario!",
-    "i am "           : 30,
-    "years old"       : false,
-    "you believe me?" : null
-  }
-""" :: String
+-- ([Tuple ([0].userId) (8927524),
+--   Tuple ([0].profile.name) ("Mary Jane"),
+--   Tuple ([0].profile.age) (29),
+--   Tuple ([0].profile.gender) ("female"),
+--   Tuple ([0].comments[0].id) ("F2372BAC"),
+--   Tuple ([0].comments[0].text) ("I concur."),
+--   Tuple ([0].comments[0].replyTo[0]) (9817361),
+--   Tuple ([0].comments[0].replyTo[1]) ("F8ACD164F"),
+--   Tuple ([0].comments[0].time) ("2015-02-03"),
+--   Tuple ([0].comments[1].id) ("GH732AFC"),
+--   Tuple ([0].comments[1].replyTo[0]) (9654726),
+--   Tuple ([0].comments[1].replyTo[1]) ("A44124F"),
+--   Tuple ([0].comments[1].time) ("2015-03-01")])
 
-allLeafTypesTree = JMap m
-  where
-  m = empty
-    #   insert "its a me"        ( JLeaf (JSString  "Mario!") )
-    >>> insert "i am "           ( JLeaf (JSNumber  30)       )
-    >>> insert "years old"       ( JLeaf (JSBoolean false)    )
-    >>> insert "you believe me?" ( JLeaf (JSNull    jnull)    )
-
-jsonEqJTree :: String -> JTree -> Boolean
-jsonEqJTree x y = case jsonParser x >>= decodeJson of
-  Left  _     -> false
-  Right jtree -> jtree == y
+primmms = toPrims <$> jsonParser sampleJson
 
 checkEq :: forall a. (Eq a) => a -> Boolean
 checkEq x = (x == x)
@@ -84,24 +70,13 @@ checkEq x = (x == x)
 
 section = trace <<< (++) "\n" <<< flip (++) "\n"
 
-main = do
-  section "JSemantic test start"
 
-  -- Left ("Couldn't decode.") 
-  case jsonParser sampleJson >>= decodeJson of
-    Right x -> print (x :: JCursor)
-    x       -> print  x
 
-  trace "eq of JSemantic"
-  quickCheck' 10 (checkEq :: JSemantic -> Boolean)
 
-  section "JTree test start"
 
-  trace "eq of JTree"
-  quickCheck' 10 (checkEq :: JTree -> Boolean)
+init = do 
+  -- section "wowzers"
 
-  trace "sampleJson matches sampleJTree"
-  assert $ jsonEqJTree sampleJson sampleJTree
+  -- print primmms
 
-  trace "all json types parse"
-  assert $ jsonEqJTree allLeafTypesString allLeafTypesTree
+  print $ "Moov"
