@@ -5,33 +5,51 @@ import Data.Argonaut.Decode ( DecodeJson )
 import Data.Argonaut.JCursor 
 import Data.Argonaut
 import Data.Either
-import Data.StrMap (empty, fold)
 import Data.Tuple
 import Data.Foldable (foldr)
 import Text.Smolder.Markup 
-import Text.Smolder.HTML (div,td,tr)
+import Text.Smolder.HTML (td,tr,th,thead,tbody,table)
 import Text.Smolder.Renderer.String (render)
 
 type Level = Number
+type Row   = [[Markup]]
 
-build :: Number 
-      -> Tuple 
-         JCursor 
-         JsonPrim
-      -> Tuple 
-         [[Markup]] -- <thead>
-         [[Markup]] -- <tbody>
-      -> Tuple
-         [[Markup]] -- <thead>
-         [[Markup]] -- <tbody>
+emptyRow :: Row
+emptyRow = [[]]
 
-build i (Tuple JCursorTop p) (Tuple h b@((cells):rows)) 
+build :: Either String [Tuple JCursor JsonPrim] 
+      -> Either String (Tuple Row Row)
+build e = go 0 (Tuple emptyRow emptyRow) <$> e 
 
-  = let c = p # show >>> text >>> td    
-    in if i == 0 then Tuple h ([c]:b)
-                 else Tuple h ((c:cells):rows)
-  
--- build i (Tuple (JField field jc) p) (Tuple h b) = 
-  
---   = if i == 0 then Tuple () b
+  where
 
+  go :: Number -> Tuple Row Row -> [Tuple JCursor JsonPrim] -> Tuple Row Row
+  go i tr [t] = build' i tr t
+  go i tr (t:ts) = go (i + 1) (go i tr [t]) ts
+
+  build' :: Number 
+        -> Tuple 
+           Row -- <thead>
+           Row -- <tbody>
+        -> Tuple 
+           JCursor 
+           JsonPrim
+        -> Tuple
+           Row -- <thead>
+           Row -- <tbody>
+
+  build' i (Tuple h b@((cells):rows)) (Tuple JCursorTop p)
+
+    = let c = p # show >>> text >>> td    
+      in if i == 0 then Tuple h ([c]:b)
+                   else Tuple h ((c:cells):rows)
+    
+  build' i (Tuple h@((cells):rows) b) (Tuple (JField field jc) p) 
+
+    = let c = field # text >>> th
+      in if i == 0 then build' i (Tuple ([c]:h) b)          (Tuple jc p)
+                   else build' i (Tuple ((c:cells):rows) b) (Tuple jc p)
+
+  build' i (Tuple h b) (Tuple (JIndex index jc) p)
+
+    = build' i (Tuple h b) (Tuple jc p)
