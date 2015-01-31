@@ -134,8 +134,59 @@ section = trace <<< (++) "\n" <<< flip (++) "\n"
 
 
 init = do 
-  -- section "wowzers"
+  let b = build primmms
+  section "-----------------------------------"
+  print b
 
-  -- print primmms
 
-  print $ "Moov"
+
+-- <table>
+--   <thead>
+--     <tr>
+--       <th>time</th>
+--       <th>comments</th>
+--       <th>replyTo</th>
+--       <th>comments</th>
+--       <th>replyTo</th>
+--       <th>comments</th>
+--       <th>id</th>
+--       <th>comments</th>
+--       <th>time</th>
+--       <th>comments</th>
+--       <th>replyTo</th>
+--       <th>comments</th>
+--       <th>replyTo</th>
+--       <th>comments</th>
+--       <th>text</th>
+--       <th>comments</th>
+--       <th>id</th>
+--       <th>comments</th>
+--       <th>gender</th>
+--       <th>profile</th>
+--       <th>age</th>
+--       <th>profile</th>
+--       <th>name</th>
+--       <th>profile</th>
+--       <th>userId</th>
+--     </tr>
+--     <tr/>
+--   </thead>
+--   <tbody>
+--     <tr>
+--       <td>"2015-03-01"</td>
+--       <td>"A44124F"</td>
+--       <td>9654726</td>
+--       <td>"GH732AFC"</td>
+--       <td>"2015-02-03"</td>
+--       <td>"F8ACD164F"</td>
+--       <td>9817361</td>
+--       <td>"I concur."</td>
+--       <td>"F2372BAC"</td>
+--       <td>"female"</td>
+--       <td>29</td>
+--       <td>"Mary Jane"</td>
+--       <td>8927524</td>
+--     </tr>
+--     <tr/>
+--   </tbody>
+-- </table>

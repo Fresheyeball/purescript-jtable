@@ -11,6 +11,8 @@ import Text.Smolder.Markup
 import Text.Smolder.HTML (td,tr,th,thead,tbody,table)
 import Text.Smolder.Renderer.String (render)
 
+import Debug.Foreign (fspy)
+
 type Level = Number
 type Row   = [[Markup]]
 
@@ -27,8 +29,8 @@ build e = row <$> foldToRows 0 (Tuple emptyRow emptyRow) <$> e
   row (Tuple h b) = let
       concatTo xss f = f <<< mconcat $ tr <<< mconcat <$> xss
     in table do
-      h `concatTo` thead
-      b `concatTo` tbody
+      (fspy h) `concatTo` thead
+      (fspy b) `concatTo` tbody
 
   foldToRows :: Number 
              -> Tuple Row Row 
@@ -43,9 +45,9 @@ build e = row <$> foldToRows 0 (Tuple emptyRow emptyRow) <$> e
          -> Tuple JCursor JsonPrim
          -> Tuple Row Row -- Tuple thead tbody
 
-  build' i (Tuple h b@((cells):rows)) (Tuple JCursorTop p)
+  build' i (Tuple h b@((cells):rows)) (Tuple JCursorTop prim)
 
-    = let c = p # show >>> text >>> td    
+    = let c = prim # show >>> text >>> td    
       in if i == 0 then Tuple h ([c]:b)
                    else Tuple h ((c:cells):rows)
     
