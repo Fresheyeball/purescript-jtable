@@ -6,7 +6,7 @@ import Data.Argonaut.JCursor
 import Data.Argonaut
 import Data.Either
 import Data.Tuple
-import Data.Foldable (foldr)
+import Data.Foldable (foldr, mconcat)
 import Text.Smolder.Markup 
 import Text.Smolder.HTML (td,tr,th,thead,tbody,table)
 import Text.Smolder.Renderer.String (render)
@@ -18,25 +18,30 @@ emptyRow :: Row
 emptyRow = [[]]
 
 build :: Either String [Tuple JCursor JsonPrim] 
-      -> Either String (Tuple Row Row)
-build e = go 0 (Tuple emptyRow emptyRow) <$> e 
+      -> Either String Markup
+build e = row <$> foldToRows 0 (Tuple emptyRow emptyRow) <$> e 
 
   where
 
-  go :: Number -> Tuple Row Row -> [Tuple JCursor JsonPrim] -> Tuple Row Row
-  go i tr [t] = build' i tr t
-  go i tr (t:ts) = go (i + 1) (go i tr [t]) ts
+  row :: Tuple Row Row -> Markup
+  row (Tuple h b) = let
+      concatTo xss f = f <<< mconcat $ tr <<< mconcat <$> xss
+    in table do
+      h `concatTo` thead
+      b `concatTo` tbody
 
-  build' :: Number 
-        -> Tuple 
-           Row -- <thead>
-           Row -- <tbody>
-        -> Tuple 
-           JCursor 
-           JsonPrim
-        -> Tuple
-           Row -- <thead>
-           Row -- <tbody>
+  foldToRows :: Number 
+             -> Tuple Row Row 
+             -> [Tuple JCursor JsonPrim] 
+             -> Tuple Row Row
+
+  foldToRows i tr [t] = build' i tr t
+  foldToRows i tr (t:ts) = foldToRows (i + 1) (foldToRows i tr [t]) ts
+
+  build' :: Number
+         -> Tuple Row Row -- Tuple thead tbody
+         -> Tuple JCursor JsonPrim
+         -> Tuple Row Row -- Tuple thead tbody
 
   build' i (Tuple h b@((cells):rows)) (Tuple JCursorTop p)
 
