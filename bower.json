@@ -26,7 +26,7 @@
   "devDependencies": {
     "purescript-strongcheck": "~0.6.0",
     "purescript-test-unit": "~1.1.5",
-    "purescript-debug-foreign": "~0.0.3"
+    "purescript-debug-foreign": "*"
   },
   "resolutions": {
     "purescript-maps": "~0.2.0"

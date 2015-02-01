@@ -11,7 +11,7 @@ import Text.Smolder.Markup
 import Text.Smolder.HTML (td,tr,th,thead,tbody,table)
 import Text.Smolder.Renderer.String (render)
 
-import Debug.Foreign (fspy)
+import Debug.Spy (spy)
 
 type Level = Number
 type Row   = [[Markup]]
@@ -29,8 +29,8 @@ build e = row <$> foldToRows 0 (Tuple emptyRow emptyRow) <$> e
   row (Tuple h b) = let
       concatTo xss f = f <<< mconcat $ tr <<< mconcat <$> xss
     in table do
-      (fspy h) `concatTo` thead
-      (fspy b) `concatTo` tbody
+      (spy h) `concatTo` thead
+      (spy b) `concatTo` tbody
 
   foldToRows :: Number 
              -> Tuple Row Row 
