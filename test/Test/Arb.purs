@@ -48,9 +48,9 @@ instance arbitraryJson :: Arbitrary Json where
 instance arbitraryJsonPrim :: Arbitrary JsonPrim where
   arbitrary = chooseInt 0 3 >>= \x -> case x of
     0 -> primBool <$> arbitrary
-    1 -> primNum  <$> arbitrary
-    2 -> return primNull
-    3 -> primStr  <$> arbitrary
+    1 -> primNum  <$> arbitrary    
+    2 -> primStr  <$> arbitrary
+    3 -> return primNull
 
 instance arbJCursor :: Arbitrary JCursor where
   arbitrary =  do i <- chooseInt 0 2

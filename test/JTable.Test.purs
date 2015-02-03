@@ -6,13 +6,15 @@ import Data.Argonaut.JCursor
 import Data.Either
 import Data.Map
 import Data.Tuple
+import Data.Foldable (foldr)
+import Data.Array (nub, sort)
 
 import Test.StrongCheck
 import Test.StrongCheck.Gen
 import Test.QuickCheck.Tuple
 
 import Debug.Trace
-import Debug.Foreign
+import Debug.Spy
 
 import Test.JTable.Arb
 
@@ -33,12 +35,11 @@ checkNormalizeJCursor jc =
   check (JField _ jc') = check jc'
   check (JIndex _ _  ) = false
 
-checkCollect :: Tuple JCursor JsonPrim -> Result
-checkCollect (Tuple jc jp) = (jc == jc) <?> "Check Collect: "-- <> show x
-  -- where 
-  -- xs = collect >>> keys
-  -- xs' = Data.Array.nub $ (normalizeCursor <<< fst) <$> x
-
+checkCollect :: [Tuple JCursor JsonPrim] -> Result
+checkCollect x = xs == xs' <?> "Check Collect: " <> show x
+  where 
+  xs  = sort <<< keys   $ foldr collect empty x
+  xs' = sort <<< nub    $ normalizeCursor <<< fst <$> x
 
 init = do
 
