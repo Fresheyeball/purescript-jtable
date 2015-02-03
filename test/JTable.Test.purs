@@ -1,4 +1,4 @@
-module Render.Dom.JTable.Test where
+module JTable.Test where
 
 import Data.Argonaut
 import Data.Argonaut.JCursor
@@ -10,8 +10,7 @@ import Test.StrongCheck
 import Debug.Trace
 import Debug.Foreign
 
-import Render.Dom.JTable
-import Render.Dom.JTable.Test.Arb
+import JTable
 
 sampleJson = """
 {
@@ -133,10 +132,7 @@ section = trace <<< (++) "\n" <<< flip (++) "\n"
 
 
 
-init = do 
-  let b = build primmms
-  section "-----------------------------------"
-  print b
+init = print "compilation successful"
 
 
 
