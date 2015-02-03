@@ -23,3 +23,20 @@ normalizeCursor jc = case jc of
   JField f (JIndex _ jc) -> normalizeCursor $ JField f jc
   JField f jc            -> JField f $ normalizeCursor jc
   JIndex _ jc            -> normalizeCursor jc
+
+parseNRender :: String -> Either String Markup
+parseNRender x = renderJTable <$> jsonParser x
+
+collect :: Tuple JCursor JsonPrim -> Map JCursor [JsonPrim] -> Map JCursor [JsonPrim]
+collect (Tuple jc' jp) m = let jc = normalizeCursor jc'
+                           in if member jc m 
+                              then alter (\mv -> (<>) [jp] <$> mv) jc m 
+                              else insert jc [jp] m 
+
+-- renderJTable :: Json -> Markup
+-- renderJTable json = toPrims json # flip foldr empty \(Tuple jc v) m ->
+--   let 
+--     jc' = normalizeCursor jc
+--   in if member jc' m then 
+
+renderJTable _ = td $ text "foo"
