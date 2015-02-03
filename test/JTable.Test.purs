@@ -51,7 +51,9 @@ stringCursor (JIndex i jc) = "JIndex " <> show i <> " (" <> stringCursor jc <> "
 checkNormalizeJCursor :: JCursor -> Result
 checkNormalizeJCursor jc =
   
-  check (normalizeCursor jc) <?> "Normalize JCursor: " <> stringCursor jc
+  check (normalizeCursor jc) 
+
+  <?> "Normalize JCursor: " <> stringCursor jc
   
   where
   
@@ -74,16 +76,20 @@ checkCollect x = xs == xs'
 checkUniform :: JsonPrim -> JsonPrim -> JsonPrim -> Result
 checkUniform jp jp' jp'' = let 
     
-    testPrim jp | isNull    (primToJson jp) = 1
-                | isString  (primToJson jp) = 2
-                | isBoolean (primToJson jp) = 3
-                | isNumber  (primToJson jp) = 4  
+  testPrim jp | primToJson jp # isNull    = 1
+              | primToJson jp # isString  = 2
+              | primToJson jp # isBoolean = 3
+              | primToJson jp # isNumber  = 4  
 
-    homo      = uniform [ jp, jp,  jp   ]
-    hetro     = uniform [ jp, jp', jp'' ]
-    arbHetro  = testPrim jp   /= testPrim jp' 
-             || testPrim jp'  /= testPrim jp'' 
-             || testPrim jp'' /= testPrim jp 
+  homo      = uniform [ jp, jp,  jp   ]
+  hetro     = uniform [ jp, jp', jp'' ]
+  arbHetro  = let 
+
+    a = testPrim jp
+    b = testPrim jp'
+    c = testPrim jp''   
+    
+    in   a /= b   ||   b /= c   ||   c /= a
 
   in (if arbHetro 
       then homo == Homogeneous && hetro == Heterogeneous 
@@ -94,9 +100,11 @@ checkUniform jp jp' jp'' = let
     <>  "->       " <> show jp'' <> "\n"
 
 murf = section "murf" *> case jsonParser sampleJson of
-  Right x -> print <<< foldr collect empty <<< toPrims $ x
+  Right x -> x # toPrims >>> foldr collect empty >>> print
 
 init = do
+
+  section "JTable"
 
   trace "Normalize JCursor"
   quickCheck checkNormalizeJCursor

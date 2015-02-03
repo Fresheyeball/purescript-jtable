@@ -20,6 +20,7 @@ type Row   = [[Markup]]
 data Uniformity = Heterogeneous | Homogeneous
 
 instance showUniformity :: Show Uniformity where
+
   show Heterogeneous 
     = "Heterogeneous"
   show Homogeneous 
@@ -27,7 +28,7 @@ instance showUniformity :: Show Uniformity where
 
 instance eqUniformity :: Eq Uniformity where
 
-  (==) Homogeneous Homogeneous = true
+  (==) Homogeneous   Homogeneous   = true
   (==) Heterogeneous Heterogeneous = true
   (==) _ _ = false
   (/=) x y = not $ x == y 
@@ -52,23 +53,26 @@ uniform = fst <<< foldr f (Tuple Homogeneous 0)
   where
 
   f _  (Tuple Heterogeneous x) = Tuple Heterogeneous x
-  f jp (Tuple _ 0)             = Tuple Homogeneous $ testPrim $ primToJson jp  
-  f jp (Tuple _ i)             = Tuple 
+  f jp (Tuple _ 0)             = Tuple Homogeneous $ testPrim jp  
+  f jp (Tuple _ i)             = Tuple     
     (if i == i' then Homogeneous else Heterogeneous) i'
-    where i' = testPrim $ primToJson jp  
+    where i' = testPrim jp  
 
-  testPrim jp | isNull    jp = 1
-              | isString  jp = 2
-              | isBoolean jp = 3
-              | isNumber  jp = 4  
+  testPrim = testPrim' <<< primToJson 
 
--- renderJTable :: Json -> Markup
+    where
+
+    testPrim' jp | isNull    jp = 1
+                 | isString  jp = 2
+                 | isBoolean jp = 3
+                 | isNumber  jp = 4  
+
+renderJTable :: Json -> Markup
 -- renderJTable json = toPrims json # flip foldr empty \(Tuple jc v) m ->
 --   let 
 --     jc' = normalizeCursor jc
 --   in if member jc' m then 
+renderJTable _ = td $ text "foo"
 
 parseNRender :: String -> Either String Markup
 parseNRender x = renderJTable <$> jsonParser x
-
-renderJTable _ = td $ text "foo"
