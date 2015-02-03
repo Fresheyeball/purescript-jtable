@@ -19,6 +19,17 @@ sampleJson = """
 }
 """ :: String
 
+[
+Tuple (JField comments (JField id (JCursorTop))) (["F2372BAC","GH732AFC"]),
+Tuple (JField comments (JField replyTo (JCursorTop))) ([9817361,"F8ACD164F",9654726,"A44124F"]),
+Tuple (JField comments (JField text (JCursorTop))) (["I concur."]),
+Tuple (JField comments (JField time (JCursorTop))) (["2015-02-03","2015-03-01"]),
+Tuple (JField profile (JField age (JCursorTop))) ([29]),
+Tuple (JField profile (JField gender (JCursorTop))) (["female"]),
+Tuple (JField profile (JField name (JCursorTop))) (["Mary Jane"]),
+Tuple (JField userId (JCursorTop)) ([8927524])
+]
+
 -- ([Tuple (JField "userId"   (JCursorTop))                                              (8927524),
 
 --   Tuple (JField "profile"  (JField "name"   (JCursorTop)))                              ("Mary Jane"),
