@@ -14,8 +14,26 @@ import Text.Smolder.Renderer.String (render)
 
 import Debug.Spy (spy)
 
-type Level = Number
-type Row   = [[Markup]]
+type Level  = Number
+type Index  = Number
+type Depth  = Number
+type Length = Number 
+type Height = Number
+
+type TH = { level       :: Level
+          , depth       :: Depth
+          , length      :: Length
+          , uniformity  :: Uniformity }
+
+type TD = { index       :: Index
+          , level       :: Level
+          , height      :: Height
+          , value       :: JsonPrim }          
+
+type THMap = Map JCursor  TH
+type TDMap = Map JCursor [TD]
+
+type Row    = [[Markup]]
 
 data Uniformity = Heterogeneous | Homogeneous
 
@@ -41,11 +59,9 @@ normalizeCursor jc = case jc of
   JField f jc            -> JField f $ normalizeCursor jc
   JIndex _ jc            -> normalizeCursor jc
 
-collect :: Tuple JCursor JsonPrim -> Map JCursor [JsonPrim] -> Map JCursor [JsonPrim]
+collect :: Tuple JCursor TH -> THMap -> THMap
 collect (Tuple jc' jp) m = let jc = normalizeCursor jc'
-                           in if member jc m                               
-                              then alter (\mv -> (<>) [jp] <$> mv) jc m 
-                              else insert jc [jp] m 
+                   in insert jc jp m 
 
 uniform :: [JsonPrim] -> Uniformity
 uniform = fst <<< foldr f (Tuple Homogeneous 0)
@@ -67,12 +83,20 @@ uniform = fst <<< foldr f (Tuple Homogeneous 0)
                  | isBoolean jp = 3
                  | isNumber  jp = 4  
 
-renderJTable :: Json -> Markup
--- renderJTable json = toPrims json # flip foldr empty \(Tuple jc v) m ->
---   let 
---     jc' = normalizeCursor jc
---   in if member jc' m then 
 renderJTable _ = td $ text "foo"
 
 parseNRender :: String -> Either String Markup
 parseNRender x = renderJTable <$> jsonParser x
+
+
+-- sortToMaps :: [Tuple JCursor JsonPrim] -> Tuple THMap TDMap
+-- sortToMaps = foldr f emptyZipper
+
+--   where 
+
+--   emptyZipper = Tuple ( empty :: THMap ) ( empty :: TDMap )
+
+--   f :: Tuple JCursor JsonPrim -> 
+--   f jj@(Tuple jc jp) tm@(Tuple _th _td) = do  
+--       collect jj 
+--       g (Tuple (JField s JCursorTop) jp) (Tuple _th _td) = 

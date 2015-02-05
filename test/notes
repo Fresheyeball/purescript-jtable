@@ -30,22 +30,22 @@ Tuple (JField profile (JField name (JCursorTop))) (["Mary Jane"]),
 Tuple (JField userId (JCursorTop)) ([8927524])
 ]
 
--- ([Tuple (JField "userId"   (JCursorTop))                                              (8927524),
+-- ([Tuple                              (JField "userId"  (JCursorTop))               (8927524),
 
---   Tuple (JField "profile"  (JField "name"   (JCursorTop)))                              ("Mary Jane"),
---   Tuple (JField "profile"  (JField "age"    (JCursorTop)))                              (29),
---   Tuple (JField "profile"  (JField "gender" (JCursorTop)))                              ("female"),
+--   Tuple (JField "profile"            (JField "name"    (JCursorTop)))              ("Mary Jane"),
+--   Tuple (JField "profile"            (JField "age"     (JCursorTop)))              (29),
+--   Tuple (JField "profile"            (JField "gender"  (JCursorTop)))              ("female"),
 
---   Tuple (JField "comments" (JIndex 0      (JField "id"      (JCursorTop))))             ("F2372BAC"),
---   Tuple (JField "comments" (JIndex 0      (JField "text"    (JCursorTop))))             ("I concur."),
---   Tuple (JField "comments" (JIndex 0      (JField "replyTo" (JIndex 0 (JCursorTop)))))  (9817361),
---   Tuple (JField "comments" (JIndex 0      (JField "replyTo" (JIndex 1 (JCursorTop)))))  ("F8ACD164F"),
---   Tuple (JField "comments" (JIndex 0      (JField "time"    (JCursorTop))))             ("2015-02-03"),
+--   Tuple (JField "comments" (JIndex 0 (JField "id"      (JCursorTop))))             ("F2372BAC"),
+--   Tuple (JField "comments" (JIndex 0 (JField "text"    (JCursorTop))))             ("I concur."),
+--   Tuple (JField "comments" (JIndex 0 (JField "replyTo" (JIndex 0 (JCursorTop)))))  (9817361),
+--   Tuple (JField "comments" (JIndex 0 (JField "replyTo" (JIndex 1 (JCursorTop)))))  ("F8ACD164F"),
+--   Tuple (JField "comments" (JIndex 0 (JField "time"    (JCursorTop))))             ("2015-02-03"),
 
---   Tuple (JField "comments" (JIndex 1      (JField "id"      (JCursorTop))))             ("GH732AFC"),
---   Tuple (JField "comments" (JIndex 1      (JField "replyTo" (JIndex 0 (JCursorTop)))))  (9654726),
---   Tuple (JField "comments" (JIndex 1      (JField "replyTo" (JIndex 1 (JCursorTop)))))  ("A44124F"),
---   Tuple (JField "comments" (JIndex 1      (JField "time"    (JCursorTop))))             ("2015-03-01")])
+--   Tuple (JField "comments" (JIndex 1 (JField "id"      (JCursorTop))))             ("GH732AFC"),
+--   Tuple (JField "comments" (JIndex 1 (JField "replyTo" (JIndex 0 (JCursorTop)))))  (9654726),
+--   Tuple (JField "comments" (JIndex 1 (JField "replyTo" (JIndex 1 (JCursorTop)))))  ("A44124F"),
+--   Tuple (JField "comments" (JIndex 1 (JField "time"    (JCursorTop))))             ("2015-03-01")])
 
 -- <table>
 --   <thead>
@@ -122,3 +122,11 @@ primmms = toPrims <$> jsonParser sampleJson
 checkEq :: forall a. (Eq a) => a -> Boolean
 checkEq x = (x == x)
      && not (x /= x)
+
+
+
+[] concat
+0 +
+1 *
+-> <<<
+"" append

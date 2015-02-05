@@ -61,7 +61,7 @@ checkNormalizeJCursor jc =
   check (JField _ jc') = check jc'
   check (JIndex _ _  ) = false
 
-checkCollect :: [Tuple JCursor JsonPrim] -> Result
+checkCollect :: [Tuple JCursor THMap] -> Result
 checkCollect x = xs == xs' 
 
   <?> "Check Collect: " <> show x   <> "\n"
@@ -91,9 +91,8 @@ checkUniform jp jp' jp'' = let
     
     in   a /= b   ||   b /= c   ||   c /= a
 
-  in (if arbHetro 
-      then homo == Homogeneous && hetro == Heterogeneous 
-      else homo == Homogeneous)
+  in (homo == Homogeneous &&
+    (if arbHetro then hetro == Heterogeneous else true))
 
     <?> "Uniform: " <> show jp   <> "\n"
     <>  "->       " <> show jp'  <> "\n"
