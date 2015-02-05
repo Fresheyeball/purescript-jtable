@@ -40,10 +40,16 @@ newTD :: Level -> Index -> Height -> JsonPrim -> TD
 newTD l i h v = TD { level : l, index : i, height : h, value : v }
 
 instance showTH :: Show TH where
-  show (TH th) = "TH { level : "    <> show th.level
-               <> ", depth : "      <> show th.depth
-               <> ", length : "     <> show th.length
-               <> ", uniformity : " <> show th.uniformity <> " }"
+  show (TH th) = "TH { level : "      <> show th.level
+                 <> ", depth : "      <> show th.depth
+                 <> ", length : "     <> show th.length
+                 <> ", uniformity : " <> show th.uniformity <> " }"
+
+instance showTD :: Show TD where
+  show (TD td) = "TD { level : "      <> show td.level
+                 <> ", index : "      <> show td.index
+                 <> ", height : "     <> show td.height
+                 <> ", value : "      <> show td.value <> " }"
 
 type Row    = [[Markup]]
 
