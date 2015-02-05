@@ -61,7 +61,7 @@ checkNormalizeJCursor jc =
   check (JField _ jc') = check jc'
   check (JIndex _ _  ) = false
 
-checkCollect :: [Tuple JCursor THMap] -> Result
+checkCollect :: [Tuple JCursor TH] -> Result
 checkCollect x = xs == xs' 
 
   <?> "Check Collect: " <> show x   <> "\n"
@@ -70,7 +70,7 @@ checkCollect x = xs == xs'
   
   where 
   
-  xs  = sort <<< keys $ foldr collect empty x
+  xs  = sort <<< keys $ foldr collect (empty :: THMap) x
   xs' = sort <<< nub  $ normalizeCursor <<< fst <$> x
 
 checkUniform :: JsonPrim -> JsonPrim -> JsonPrim -> Result
@@ -98,8 +98,8 @@ checkUniform jp jp' jp'' = let
     <>  "->       " <> show jp'  <> "\n"
     <>  "->       " <> show jp'' <> "\n"
 
-murf = section "murf" *> case jsonParser sampleJson of
-  Right x -> x # toPrims >>> foldr collect empty >>> print
+-- murf = section "murf" *> case jsonParser sampleJson of
+--   Right x -> x # toPrims >>> foldr collect empty >>> print
 
 init = do
 

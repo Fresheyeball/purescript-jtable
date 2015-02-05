@@ -20,18 +20,30 @@ type Depth  = Number
 type Length = Number 
 type Height = Number
 
-type TH = { level       :: Level
-          , depth       :: Depth
-          , length      :: Length
-          , uniformity  :: Uniformity }
+data TH = TH { level       :: Level
+             , depth       :: Depth
+             , length      :: Length
+             , uniformity  :: Uniformity }
 
-type TD = { index       :: Index
-          , level       :: Level
-          , height      :: Height
-          , value       :: JsonPrim }          
+data TD = TD { level       :: Level
+             , index       :: Index             
+             , height      :: Height
+             , value       :: JsonPrim }
 
 type THMap = Map JCursor  TH
 type TDMap = Map JCursor [TD]
+
+newTH :: Level -> Depth -> Length -> Uniformity -> TH 
+newTH l d l' u = TH { level : l, depth : d, length : l', uniformity : u }
+
+newTD :: Level -> Index -> Height -> JsonPrim -> TD
+newTD l i h v = TD { level : l, index : i, height : h, value : v }
+
+instance showTH :: Show TH where
+  show (TH th) = "TH { level : "    <> show th.level
+               <> ", depth : "      <> show th.depth
+               <> ", length : "     <> show th.length
+               <> ", uniformity : " <> show th.uniformity <> " }"
 
 type Row    = [[Markup]]
 
@@ -60,8 +72,7 @@ normalizeCursor jc = case jc of
   JIndex _ jc            -> normalizeCursor jc
 
 collect :: Tuple JCursor TH -> THMap -> THMap
-collect (Tuple jc' jp) m = let jc = normalizeCursor jc'
-                   in insert jc jp m 
+collect (Tuple jc jp) m = insert (normalizeCursor jc) jp m 
 
 uniform :: [JsonPrim] -> Uniformity
 uniform = fst <<< foldr f (Tuple Homogeneous 0)

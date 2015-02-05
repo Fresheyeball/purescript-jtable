@@ -7,6 +7,8 @@ import Data.Array
 import Data.Tuple
 import qualified Data.StrMap as M
 
+import JTable (TH(), TD(), Uniformity(..), newTH, newTD)
+
 import Test.StrongCheck
 import Test.StrongCheck.Gen
 
@@ -58,3 +60,20 @@ instance arbJCursor :: Arbitrary JCursor where
                        else if i == 1 then JField <$> arbitrary <*> arbitrary
                        else JIndex <$> arbitrary <*> arbitrary
                   return r
+
+instance arbitraryUniformity :: Arbitrary Uniformity where
+  arbitrary = chooseInt 0 1 >>= \a -> return $ case a of
+    0 -> Heterogeneous
+    1 -> Homogeneous
+
+instance arbitraryTH :: Arbitrary TH where
+  arbitrary = newTH <$> arbitrary 
+                    <*> arbitrary 
+                    <*> arbitrary 
+                    <*> arbitrary
+  
+instance arbitraryTD :: Arbitrary TD where
+  arbitrary = newTD <$> arbitrary
+                    <*> arbitrary 
+                    <*> arbitrary 
+                    <*> arbitrary
