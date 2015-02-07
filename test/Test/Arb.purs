@@ -7,7 +7,7 @@ import Data.Array
 import Data.Tuple
 import qualified Data.StrMap as M
 
-import JTable (TH(), TD(), Uniformity(..), newTH, newTD)
+import JTable.Types
 
 import Test.StrongCheck
 import Test.StrongCheck.Gen

@@ -12,11 +12,13 @@ import Data.Array (nub, sort)
 import Test.StrongCheck
 import Test.QuickCheck.Tuple
 
+import Control.Apply ((*>))
+
 import Debug.Trace
 import Debug.Spy
 
 import Test.JTable.Arb
-import Control.Apply ((*>))
+import JTable.Types
 
 import JTable
 
