@@ -66,8 +66,8 @@ sortToMaps = foldr f emptyZipper
     collect' :: forall a. a -> (a -> a) -> Map JCursor a -> Map JCursor a
     collect' = jc' # normalizeCursor >>> collect
 
-    pureTD = newTD 0 0 0           jp              :: TD 
-    pureTH = newTH 0 0 0 (testPrim jp) Homogeneous :: TH 
+    pureTD = newTD 1 1 1           jp              :: TD 
+    pureTH = newTH 1 1 1 (testPrim jp) Homogeneous :: TH 
 
     primType = testPrim jp
 
@@ -117,3 +117,11 @@ sortToMaps = foldr f emptyZipper
 
       in Tuple thm' tdm'
 
+buildHeader :: THMap -> Markup
+buildHeader tdm = go $ toList tdm
+
+  where 
+
+  go :: Tuple JCursor TH -> 
+  go (Tuple (JField s JCursorTop) t) = s # text >>> td
+  

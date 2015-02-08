@@ -56,7 +56,6 @@ instance showTD :: Show TD where
 
 type Row    = [[Markup]]
 
-
 data Uniformity = Heterogeneous | Homogeneous
 
 instance showUniformity :: Show Uniformity where

@@ -62,28 +62,23 @@ Tuple (JField userId (JCursorTop)) ([8927524])
 
 
 Right    (Tuple    (
- [Tuple    (JField comments    (JField id      (JCursorTop)))    (TH { level : 1, depth : 0, length : 0, primType : 2, uniformity : Homogeneous })
-, Tuple    (JField comments    (JField replyTo (JCursorTop)))    (TH { level : 3, depth : 0, length : 0, primType : 2, uniformity : Homogeneous })
-, Tuple    (JField comments    (JField text    (JCursorTop)))    (TH { level : 0, depth : 0, length : 0, primType : 2, uniformity : Homogeneous })
-, Tuple    (JField comments    (JField time    (JCursorTop)))    (TH { level : 1, depth : 0, length : 0, primType : 2, uniformity : Homogeneous })
-, Tuple    (JField profile     (JField age     (JCursorTop)))    (TH { level : 1, depth : 0, length : 0, primType : 4, uniformity : Homogeneous })
-, Tuple    (JField profile     (JField gender  (JCursorTop)))    (TH { level : 1, depth : 0, length : 0, primType : 2, uniformity : Homogeneous })
-, Tuple    (JField profile     (JField name    (JCursorTop)))    (TH { level : 1, depth : 0, length : 0, primType : 2, uniformity : Homogeneous })
-, Tuple                        (JField userId  (JCursorTop))     (TH { level : 0, depth : 0, length : 0, primType : 4, uniformity : Homogeneous })])   (
+ [Tuple    (JField comments    (JField id        (JCursorTop)))    (TH { level : 3, depth : 1, length : 2, primType : 2, uniformity : Homogeneous })
+, Tuple    (JField comments    (JField replyTo   (JCursorTop)))    (TH { level : 9, depth : 1, length : 4, primType : 2, uniformity : Heterogeneous })
+, Tuple    (JField comments    (JField text      (JCursorTop)))    (TH { level : 2, depth : 1, length : 1, primType : 2, uniformity : Homogeneous })
+, Tuple    (JField comments    (JField time      (JCursorTop)))    (TH { level : 3, depth : 1, length : 2, primType : 2, uniformity : Homogeneous })
+, Tuple    (JField profile     (JField age       (JCursorTop)))    (TH { level : 2, depth : 1, length : 1, primType : 4, uniformity : Homogeneous })
+, Tuple    (JField profile     (JField gender    (JCursorTop)))    (TH { level : 2, depth : 1, length : 1, primType : 2, uniformity : Homogeneous })
+, Tuple    (JField profile     (JField name      (JCursorTop)))    (TH { level : 2, depth : 1, length : 1, primType : 2, uniformity : Homogeneous })
+, Tuple                        (JField userId    (JCursorTop))     (TH { level : 1, depth : 1, length : 1, primType : 4, uniformity : Homogeneous })])   (
 
- [Tuple    (JField comments    (JField id      (JCursorTop)))    ([TD { level : 2, index : 1, height : 0, value : "GH732AFC" }
-                                                                  ,TD { level : 2, index : 0, height : 0, value : "F2372BAC" }])
-, Tuple    (JField comments    (JField replyTo (JCursorTop)))    ([TD { level : 3, index : 1, height : 0, value : "A44124F" }
-                                                                  ,TD { level : 3, index : 1, height : 0, value : 9654726 }
-                                                                  ,TD { level : 3, index : 0, height : 0, value : "F8ACD164F" }
-                                                                  ,TD { level : 3, index : 0, height : 0, value : 9817361 }])
-, Tuple    (JField comments    (JField text    (JCursorTop)))    ([TD { level : 2, index : 0, height : 0, value : "I concur." }])
-, Tuple    (JField comments    (JField time    (JCursorTop)))    ([TD { level : 2, index : 1, height : 0, value : "2015-03-01" }
-                                                                  ,TD { level : 2, index : 0, height : 0, value : "2015-02-03" }])
-, Tuple    (JField profile     (JField age     (JCursorTop)))    ([TD { level : 1, index : 0, height : 0, value : 29 }])
-, Tuple    (JField profile     (JField gender  (JCursorTop)))    ([TD { level : 1, index : 0, height : 0, value : "female" }])
-, Tuple    (JField profile     (JField name    (JCursorTop)))    ([TD { level : 1, index : 0, height : 0, value : "Mary Jane" }])
-, Tuple                        (JField userId  (JCursorTop))     ([TD { level : 0, index : 0, height : 0, value : 8927524 }])]))
+ [Tuple    (JField comments    (JField id        (JCursorTop)))    ([TD { level : 3, index : 1, height : 1, value : "GH732AFC" },TD { level : 3, index : 0, height : 1, value : "F2372BAC" }])
+, Tuple    (JField comments    (JField replyTo   (JCursorTop)))    ([TD { level : 3, index : 1, height : 0, value : "A44124F" },TD { level : 3, index : 1, height : 0, value : 9654726 },TD { level : 3, index : 0, height : 0, value : "F8ACD164F" },TD { level : 3, index : 0, height : 0, value : 9817361 }])
+, Tuple    (JField comments    (JField text      (JCursorTop)))    ([TD { level : 3, index : 0, height : 1, value : "I concur." }])
+, Tuple    (JField comments    (JField time      (JCursorTop)))    ([TD { level : 3, index : 1, height : 1, value : "2015-03-01" },TD { level : 3, index : 0, height : 1, value : "2015-02-03" }])
+, Tuple    (JField profile     (JField age       (JCursorTop)))    ([TD { level : 2, index : 1, height : 1, value : 29 }])
+, Tuple    (JField profile     (JField gender    (JCursorTop)))    ([TD { level : 2, index : 1, height : 1, value : "female" }])
+, Tuple    (JField profile     (JField name      (JCursorTop)))    ([TD { level : 2, index : 1, height : 1, value : "Mary Jane" }])
+, Tuple                        (JField userId    (JCursorTop))     ([TD { level : 1, index : 1, height : 1, value : 8927524 }])]))
 
 
 -- ([Tuple ([0].userId) (8927524),
