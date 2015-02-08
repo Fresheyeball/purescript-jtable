@@ -8,7 +8,7 @@ import Data.Either
 import Data.Tuple
 import Data.Map
 import Data.Monoid
-import Data.Foldable (foldr, mconcat, foldMap)
+import Data.Foldable (foldr, mconcat, foldMap, find)
 import Data.Array.Unsafe
 import Text.Smolder.Markup
 import Text.Smolder.HTML (td,tr,th,thead,tbody,table)
@@ -20,6 +20,15 @@ import JTable.Types
 
 mdefault :: forall a. (Monoid a, Eq a) => a -> a -> a
 mdefault x y = if y == mempty then x else y
+
+collect :: forall a b. (Ord b) => b -> a -> (a -> a) -> Map b a -> Map b a
+collect b a f mba = if member b            mba
+                    then alter ((<$>) f) b mba
+                    else insert b a        mba
+
+updateWith :: (a -> [a] -> [a]) -> a -> (a -> Boolean) -> (a -> a) -> [a] -> [a]
+updateWith addDefault default finder updater updatee =
+  
 
 normalizeCursor :: JCursor -> JCursor
 normalizeCursor jc = case jc of
@@ -49,12 +58,6 @@ renderJTable _ = td $ text "foo"
 
 parseNRender :: String -> Either String Markup
 parseNRender x = renderJTable <$> jsonParser x
-
-
-collect :: forall a. JCursor -> a -> (a -> a) -> Map JCursor a -> Map JCursor a
-collect njc pu f tdm = if member njc            tdm
-                       then alter ((<$>) f) njc tdm
-                       else insert njc pu       tdm
 
 sortToMaps :: [Tuple JCursor JsonPrim] -> Tuple THMap TDMap
 sortToMaps = foldr f emptyZipper
@@ -125,19 +128,22 @@ sortToMaps = foldr f emptyZipper
 collapseRow :: (Markup -> Markup) -> Row -> Markup
 collapseRow t = foldMap $ tr <<< mconcat <<< (<$>) \(Tuple s n) -> t ! colspan (show n) $ text s
 
-buildHeader :: THMap -> Row
-buildHeader thm = foldr go [[]] $ toList thm
+type MRow = Map Number [Tuple String Number]
+
+buildHeader :: THMap -> Markup
+buildHeader = collapseRow th <<< values <<< snd <<< foldr go a <<< toList
 
   where
 
-  go :: Tuple JCursor TH -> Row -> Row
+  a = Tuple 0 (empty :: MRow)
 
-  go (Tuple (JField s JCursorTop) (TH t)) (xs:xss) = (Tuple s t.width : xs) : xss
+  go :: Tuple JCursor TH -> Tuple Level MRow -> Tuple Level MRow 
 
+  go (Tuple (JField s JCursorTop) (TH t)) (Tuple _ tm) = 
+    let n = Tuple s t.width in Tuple 1 $ collect 0 [n] ((:) n) tm
 
-
-
---  go :: Tuple JCursor TH -> Tuple String Number
---  go (Tuple (JField s JCursorTop) (TH t)) =
---    [th ! colspan t.width $ text s]
---  go (Tuple (JField s jf) (TH t)) =
+  -- go (Tuple (JField s jc) th@(TH t)) tup = case go (Tuple jc th) tup of 
+  --   Tuple i tm -> let 
+  --       n    = Tuple s t.width
+  --       find ((==) s <<< fst) xs
+  --     in Tuple (i + 1) $ collect i [n] ((:) n) tm
