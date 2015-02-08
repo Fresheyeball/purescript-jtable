@@ -6,6 +6,7 @@ import Data.Argonaut.JCursor
 import Data.Either
 import Data.Map
 import Data.Tuple
+import Data.String.Regex (regex, replace)
 import Data.Foldable (foldr)
 import Data.Array (nub, sort)
 
@@ -105,6 +106,20 @@ checkUniform jp jp' jp'' = let
 -- murf = section "murf" *> case jsonParser sampleJson of
 --   Right x -> x # toPrims >>> foldr collect empty >>> print
 
+regDefault = {global : true, ignoreCase : false, multiline : true, sticky : false, unicode : false}
+
+matchIt s = replace $ regex s regDefault
+
+prettyPrint :: forall a e. (Show a) => a -> Control.Monad.Eff.Eff 
+  ( trace  :: Trace
+  , err    :: Control.Monad.Eff.Exception.Exception
+  , random :: Control.Monad.Eff.Random.Random | e) Unit
+prettyPrint = show 
+  >>> matchIt "fromList \\[" "\n [" 
+  >>> matchIt ",Tuple" "\n, Tuple" 
+  >>> matchIt "\\(" "\t ("
+  >>> trace 
+
 init = do
 
   section "JTable"
@@ -120,4 +135,4 @@ init = do
 
   section "foobar"
 
-  print $ sortToMaps <<< toPrims <$> jsonParser sampleJson
+  prettyPrint $ sortToMaps <<< toPrims <$> jsonParser sampleJson
