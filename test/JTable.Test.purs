@@ -63,6 +63,7 @@ checkNormalizeJCursor jc =
   check (JField _ jc') = check jc'
   check (JIndex _ _  ) = false
 
+-- TODO: Refactor to be more pure
 checkCollect :: [Tuple JCursor TH] -> Result
 checkCollect x = xs == xs' 
 
@@ -80,13 +81,12 @@ checkCollect x = xs == xs'
 checkUniform :: JsonPrim -> JsonPrim -> JsonPrim -> Result
 checkUniform jp jp' jp'' = let 
     
-  testPrim jp | primToJson jp # isNull    = 1
-              | primToJson jp # isString  = 2
-              | primToJson jp # isBoolean = 3
-              | primToJson jp # isNumber  = 4  
+  uniform' z (Tuple pt u) = Tuple pt (uniform z pt u)
 
-  homo      = uniform [ jp, jp,  jp   ]
-  hetro     = uniform [ jp, jp', jp'' ]
+  p = Tuple (testPrim jp) Homogeneous
+
+  homo      = snd $ foldr uniform' p [ jp, jp,  jp   ]
+  hetro     = snd $ foldr uniform' p [ jp, jp', jp'' ]
   arbHetro  = let 
 
     a = testPrim jp

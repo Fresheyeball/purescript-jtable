@@ -67,11 +67,13 @@ instance arbitraryUniformity :: Arbitrary Uniformity where
     1 -> Homogeneous
 
 instance arbitraryTH :: Arbitrary TH where
-  arbitrary = newTH <$> arbitrary 
-                    <*> arbitrary 
-                    <*> arbitrary 
-                    <*> arbitrary
-  
+  arbitrary = chooseInt 1 4 >>= \a ->
+    newTH <$> arbitrary 
+          <*> arbitrary 
+          <*> arbitrary
+          <*> return a
+          <*> arbitrary
+
 instance arbitraryTD :: Arbitrary TD where
   arbitrary = newTD <$> arbitrary
                     <*> arbitrary 

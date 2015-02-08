@@ -23,26 +23,22 @@ normalizeCursor jc = case jc of
   JField f jc            -> JField f $ normalizeCursor jc
   JIndex _ jc            -> normalizeCursor jc
 
+testPrim :: JsonPrim -> PrimType
+testPrim = primToJson >>> t
 
-uniform :: [JsonPrim] -> Uniformity
-uniform = fst <<< foldr f (Tuple Homogeneous 0)
-  
   where
 
-  f _  (Tuple Heterogeneous x) = Tuple Heterogeneous x
-  f jp (Tuple _ 0)             = Tuple Homogeneous $ testPrim jp  
-  f jp (Tuple _ i)             = Tuple     
-    (if i == i' then Homogeneous else Heterogeneous) i'
-    where i' = testPrim jp  
+  t jp | isNull    jp = 1
+       | isString  jp = 2
+       | isBoolean jp = 3
+       | isNumber  jp = 4  
 
-  testPrim = testPrim' <<< primToJson 
-
-    where
-
-    testPrim' jp | isNull    jp = 1
-                 | isString  jp = 2
-                 | isBoolean jp = 3
-                 | isNumber  jp = 4  
+uniform :: JsonPrim -> PrimType -> Uniformity -> Uniformity
+uniform _ _ Heterogeneous = Heterogeneous
+uniform _  0  Homogeneous = Homogeneous
+uniform jp pt Homogeneous = if testPrim jp == pt
+                            then Homogeneous
+                            else Heterogeneous
 
 renderJTable _ = td $ text "foo"
 
@@ -55,24 +51,45 @@ collect njc pu f tdm = if member njc            tdm
                        then alter ((<$>) f) njc tdm
                        else insert njc pu       tdm       
 
-sortToMaps :: [Tuple JCursor JsonPrim] -> Tuple THMap TDMap
-sortToMaps = foldr f emptyZipper
+-- sortToMaps :: [Tuple JCursor JsonPrim] -> Tuple THMap TDMap
+-- sortToMaps = foldr f emptyZipper
 
-  where 
+--   where 
 
-  emptyZipper = Tuple ( empty :: THMap ) ( empty :: TDMap )
+--   emptyZipper = Tuple ( empty :: THMap ) ( empty :: TDMap )
 
-  f :: Tuple JCursor JsonPrim -> Tuple THMap TDMap -> Tuple THMap TDMap
-  f (Tuple jc jp) (Tuple thm' tdm') = go jc thm' tdm'
+--   f :: Tuple JCursor JsonPrim -> Tuple THMap TDMap -> Tuple THMap TDMap
+--   f (Tuple jc' jp) (Tuple thm' tdm') = go jc' thm' tdm'
 
-    where 
+--     where 
 
-    collect' = jc # normalizeCursor >>> collect
+--     collect' :: forall a. a -> (a -> a) -> Map JCursor a -> Map JCursor a
+--     collect' = jc' # normalizeCursor >>> collect
 
-    go :: JCursor -> THMap -> TDMap -> Tuple THMap TDMap
+--     pureTD :: TD 
+--     pureTD = newTD 0 0 0 jp
 
-    go (JField s JCursorTop) thm tdm = let topTD = newTD 0 0 0 jp
-      in Tuple thm $ collect' [topTD] (\tds -> tds <> [topTD]) tdm
+--     pureTH :: TH 
+--     pureTH = newTH 0 0 0 Homogeneous
 
-    -- go ()
+--     go :: JCursor -> THMap -> TDMap -> Tuple THMap TDMap
 
+--     -- bottom cases
+
+--     go (JField _ JCursorTop) thm tdm = let
+--         inc th = newTH 0 0 (th.length + 1) 
+--       in Tuple 
+--       $ collect'  pureTH  (\th -> newTH (th.length + 1)) thm 
+--       $ collect' [pureTD] (\tds -> tds <> [pureTD]) tdm
+
+--     go (JIndex 0 JCursorTop) thm tdm = Tuple thm 
+--       $ collect' [pureTD] (\tds -> tds <> [pureTD]) tdm
+
+--     go (JIndex n JCursorTop) thm tdm = let td' = newTD 0 n 0 jp in Tuple thm
+--       $ collect' [td'] (\tds -> tds <> [td']) tdm 
+
+--     -- mid cases
+
+--     go (JField _ jc) thm tdm = go jc thm tdm
+
+--     -- go (JIndex n jc) thm tdm = go 
