@@ -108,7 +108,9 @@ checkUniform jp jp' jp'' = let
     <>  "->       " <> show jp'' <> "\n"
 
 checkCollapseRow :: Row -> Result
-checkCollapseRow rss = let 
+checkCollapseRow rss' = let 
+    -- normalizeCursor will have run before this, so no empty strings
+    rss               = filter (\(Tuple s _) -> s /= "") <$> rss'
 
     testR             = Data.String.Regex.test <<< regex'
     rendered          = render $ collapseRow th rss
@@ -116,14 +118,18 @@ checkCollapseRow rss = let
     checkLabel s      = testR  $ ">" <> s <> "</th>"
     checkColspan n    = testR  $ "colspan=\"" <> show (n :: Number) <> "\"" 
 
-    rowCount          = fromMaybe false $ (\ms -> (length $ filter ((>) 0 <<< length) rss) == length ms) 
-                     <$> match (regex' "<tr>") rendered
+    rowCount          = fromMaybe false 
+                      $ (\ms -> length rss == length ms)
+                      -- we only test for <tr to include <tr> and <tr/> excluding </tr>
+                      -- which should be a reliable count of rows
+                     <$> match (regex' "<tr") rendered
     
-    check (Tuple s n) = (checkLabel) s rendered && checkColspan n rendered  
+    check (Tuple s n) = checkLabel s rendered && checkColspan n rendered  
 
   in rss == [] || all ((==) 0 <<< length) rss || all check (mconcat rss) && rowCount
 
-    <?> "CollapseRow: " <> show rss <> "\n"
+    <?> "CollapseRow:  " <> show rss <> "\n"
+    <>  "rendered:     " <> rendered <> "\n"
 
 regex' = flip regex {global : true, ignoreCase : false, multiline : true, sticky : false, unicode : false}
 
