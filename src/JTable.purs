@@ -35,7 +35,6 @@ testPrim = primToJson >>> t
 
 uniform :: JsonPrim -> PrimType -> Uniformity -> Uniformity
 uniform _ _ Heterogeneous = Heterogeneous
-uniform _  0  Homogeneous = Homogeneous
 uniform jp pt Homogeneous = if testPrim jp == pt
                             then Homogeneous
                             else Heterogeneous
@@ -51,45 +50,53 @@ collect njc pu f tdm = if member njc            tdm
                        then alter ((<$>) f) njc tdm
                        else insert njc pu       tdm       
 
--- sortToMaps :: [Tuple JCursor JsonPrim] -> Tuple THMap TDMap
--- sortToMaps = foldr f emptyZipper
+sortToMaps :: [Tuple JCursor JsonPrim] -> Tuple THMap TDMap
+sortToMaps = foldr f emptyZipper
 
---   where 
+  where 
 
---   emptyZipper = Tuple ( empty :: THMap ) ( empty :: TDMap )
+  emptyZipper = Tuple ( empty :: THMap ) ( empty :: TDMap )
 
---   f :: Tuple JCursor JsonPrim -> Tuple THMap TDMap -> Tuple THMap TDMap
---   f (Tuple jc' jp) (Tuple thm' tdm') = go jc' thm' tdm'
+  f :: Tuple JCursor JsonPrim -> Tuple THMap TDMap -> Tuple THMap TDMap
+  f (Tuple jc' jp) (Tuple thm' tdm') = go jc' thm' tdm'
 
---     where 
+    where 
 
---     collect' :: forall a. a -> (a -> a) -> Map JCursor a -> Map JCursor a
---     collect' = jc' # normalizeCursor >>> collect
+    collect' :: forall a. a -> (a -> a) -> Map JCursor a -> Map JCursor a
+    collect' = jc' # normalizeCursor >>> collect
 
---     pureTD :: TD 
---     pureTD = newTD 0 0 0 jp
+    pureTD :: TD 
+    pureTD = newTD 0 0 0 jp
 
---     pureTH :: TH 
---     pureTH = newTH 0 0 0 Homogeneous
+    pureTH :: TH 
+    pureTH = newTH 0 0 0 0 Homogeneous
 
---     go :: JCursor -> THMap -> TDMap -> Tuple THMap TDMap
+    primType = testPrim jp
 
---     -- bottom cases
+    go :: JCursor -> THMap -> TDMap -> Tuple THMap TDMap
 
---     go (JField _ JCursorTop) thm tdm = let
---         inc th = newTH 0 0 (th.length + 1) 
---       in Tuple 
---       $ collect'  pureTH  (\th -> newTH (th.length + 1)) thm 
---       $ collect' [pureTD] (\tds -> tds <> [pureTD]) tdm
+    -- bottom cases
 
---     go (JIndex 0 JCursorTop) thm tdm = Tuple thm 
---       $ collect' [pureTD] (\tds -> tds <> [pureTD]) tdm
+    go (JField _ JCursorTop) thm tdm = let
+        
+        updateTH (TH t) = TH t
+          
+          { length      = t.length + 1
+          , uniformity  = uniform jp t.primType t.uniformity}
 
---     go (JIndex n JCursorTop) thm tdm = let td' = newTD 0 n 0 jp in Tuple thm
---       $ collect' [td'] (\tds -> tds <> [td']) tdm 
+        thm' = collect'  pureTH  updateTH thm
+        tdm' = collect' [pureTD] (\tds -> tds <> [pureTD]) tdm
 
---     -- mid cases
+      in Tuple thm' tdm'
 
---     go (JField _ jc) thm tdm = go jc thm tdm
+    go (JIndex 0 JCursorTop) thm tdm = Tuple thm 
+      $ collect' [pureTD] (\tds -> tds <> [pureTD]) tdm
 
---     -- go (JIndex n jc) thm tdm = go 
+    go (JIndex n JCursorTop) thm tdm = let td' = newTD 0 n 0 jp in Tuple thm
+      $ collect' [td'] (\tds -> tds <> [td']) tdm 
+
+    -- mid cases
+
+    go (JField _ jc) thm tdm = go jc thm tdm
+
+    -- go (JIndex n jc) thm tdm = go 
