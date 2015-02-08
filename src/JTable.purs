@@ -23,8 +23,8 @@ normalizeCursor jc = case jc of
   JField f jc            -> JField f $ normalizeCursor jc
   JIndex _ jc            -> normalizeCursor jc
 
-collect :: Tuple JCursor TH -> THMap -> THMap
-collect (Tuple jc jp) m = insert (normalizeCursor jc) jp m 
+collect :: JCursor -> TH -> THMap -> THMap
+collect = normalizeCursor >>> insert
 
 uniform :: [JsonPrim] -> Uniformity
 uniform = fst <<< foldr f (Tuple Homogeneous 0)
@@ -59,7 +59,15 @@ parseNRender x = renderJTable <$> jsonParser x
 
 --   emptyZipper = Tuple ( empty :: THMap ) ( empty :: TDMap )
 
---   f :: Tuple JCursor JsonPrim -> 
---   f jj@(Tuple jc jp) tm@(Tuple _th _td) = do  
---       collect jj 
---       g (Tuple (JField s JCursorTop) jp) (Tuple _th _td) = 
+--   f :: Tuple JCursor JsonPrim -> Tuple THMap TDMap -> Tuple THMap TDMap
+--   f (Tuple jc jp) (Tuple _th _td) = do
+
+--     where 
+
+--     go :: JCursor -> JsonPrim -> THMap -> TDMap -> Tuple THMap TDMap
+--     go (JCursor s JCursorTop) jp' th_ td_ = 
+      
+
+
+
+    -- g (Tuple (JField s JCursorTop) jp) (Tuple _th _td) = 
