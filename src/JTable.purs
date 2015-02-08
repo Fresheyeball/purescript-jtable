@@ -7,6 +7,7 @@ import Data.Argonaut
 import Data.Either
 import Data.Tuple
 import Data.Map
+import Data.Monoid
 import Data.Foldable (foldr, mconcat, foldMap)
 import Data.Array.Unsafe
 import Text.Smolder.Markup
@@ -17,12 +18,15 @@ import Text.Smolder.Renderer.String (render)
 import Debug.Spy (spy)
 import JTable.Types
 
+mdefault :: forall a. (Monoid a, Eq a) => a -> a -> a
+mdefault x y = if y == mempty then x else y
+
 normalizeCursor :: JCursor -> JCursor
 normalizeCursor jc = case jc of
 
   JCursorTop             -> JCursorTop
   JField f (JIndex _ jc) -> normalizeCursor $ JField f jc
-  JField f jc            -> JField f $ normalizeCursor jc
+  JField f jc            -> JField (mdefault "<blank>" f) $ normalizeCursor jc
   JIndex _ jc            -> normalizeCursor jc
 
 testPrim :: JsonPrim -> PrimType

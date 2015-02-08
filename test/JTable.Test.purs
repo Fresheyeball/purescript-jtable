@@ -133,13 +133,6 @@ checkCollapseRow rss' = let
 
 regex' = flip regex {global : true, ignoreCase : false, multiline : true, sticky : false, unicode : false}
 
-matchIt s = replace $ regex' s 
-
-dummyTHM :: THMap
-dummyTHM = insert (JField "foo" JCursorTop) (newTH 1 1 1 1 Homogeneous)
-         $ insert (JField "baz" JCursorTop) (newTH 1 1 1 1 Homogeneous)
-         $ empty
-
 prettyPrint :: forall a e. (Show a) => a -> Control.Monad.Eff.Eff
   ( trace  :: Trace
   , err    :: Control.Monad.Eff.Exception.Exception
@@ -149,6 +142,7 @@ prettyPrint = show
   >>> matchIt ",Tuple" "\n, Tuple"
   >>> matchIt "\\(" "\t ("
   >>> trace
+  where matchIt = replace <<< regex'
 
 init = do
 
@@ -163,10 +157,9 @@ init = do
   trace "Uniformity"
   quickCheck checkUniform
 
-  trace "collapseRow"
+  trace "CollapseRow"
   quickCheck checkCollapseRow
 
   section "foobar"
 
-  dummyTHM # buildHeader >>> collapseRow th >>> print
   --prettyPrint $ sortToMaps <<< toPrims <$> jsonParser sampleJson
