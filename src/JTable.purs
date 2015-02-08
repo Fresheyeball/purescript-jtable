@@ -110,9 +110,10 @@ sortToMaps = foldr f emptyZipper
     go (JIndex n jc) thm tdm = let 
 
         x          = go jc thm tdm
+        thm'       = fst x
         updateTD t = t{ level = t.level + 1, index = n }
         tdm'       = x # snd >>> collect' [pureTD] \ts ->
           init ts <> [updateTD `mapTD` last ts]
 
-      in Tuple (fst x) tdm'
+      in Tuple thm' tdm'
 
