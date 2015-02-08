@@ -72,8 +72,10 @@ checkCollect x = xs == xs'
   
   where 
   
-  xs  = sort <<< keys $ foldr (uncurry collect) (empty :: THMap) x
-  xs' = sort <<< nub  $ normalizeCursor <<< fst <$> x
+  xs  = sort <<< keys 
+      $ foldr (flip (uncurry $ normalizeCursor >>> collect) id) (empty :: THMap) x
+  xs' = sort <<< nub  
+      $ normalizeCursor <<< fst <$> x
 
 checkUniform :: JsonPrim -> JsonPrim -> JsonPrim -> Result
 checkUniform jp jp' jp'' = let 

@@ -30,6 +30,12 @@ newTH l d l' u = TH { level : l, depth : d, length : l', uniformity : u }
 newTD :: Level -> Index -> Height -> JsonPrim -> TD
 newTD l i h v = TD { level : l, index : i, height : h, value : v }
 
+unwrapTH :: forall a. (Level -> Depth -> Length -> Uniformity -> a) -> TH -> a
+unwrapTH f (TH {level = l, depth = d, length = l', uniformity = u}) = f l d l' u
+
+unwrapTD :: forall a. (Level -> Index -> Height -> JsonPrim -> a) -> TD -> a
+unwrapTD f (TD {level = l, index = i, height = h, value = v}) = f l i h v
+
 instance showTH :: Show TH where
   show (TH th) = "TH { level : "      <> show th.level
                  <> ", depth : "      <> show th.depth
