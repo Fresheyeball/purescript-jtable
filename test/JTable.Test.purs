@@ -117,3 +117,7 @@ init = do
 
   trace "Uniformity"
   quickCheck checkUniform
+
+  section "foobar"
+
+  print $ sortToMaps <<< toPrims <$> jsonParser sampleJson

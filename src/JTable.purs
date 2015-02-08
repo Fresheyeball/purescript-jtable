@@ -8,6 +8,7 @@ import Data.Either
 import Data.Tuple
 import Data.Map
 import Data.Foldable (foldr, mconcat)
+import Data.Array.Unsafe
 import Text.Smolder.Markup
 import Text.Smolder.HTML (td,tr,th,thead,tbody,table)
 import Text.Smolder.Renderer.String (render)
@@ -65,38 +66,67 @@ sortToMaps = foldr f emptyZipper
     collect' :: forall a. a -> (a -> a) -> Map JCursor a -> Map JCursor a
     collect' = jc' # normalizeCursor >>> collect
 
-    pureTD :: TD 
-    pureTD = newTD 0 0 0 jp
-
-    pureTH :: TH 
-    pureTH = newTH 0 0 0 0 Homogeneous
+    pureTD = newTD 0 0 0 jp            :: TD 
+    pureTH = newTH 0 0 0 0 Homogeneous :: TH 
 
     primType = testPrim jp
+
+    updateTH :: TH -> TH 
+    updateTH (TH t) = TH t      
+      { length      = t.length + 1
+      , uniformity  = uniform jp t.primType t.uniformity }
+
+    incrementLevel :: forall r. {level :: Level | r} -> {level :: Level | r}
+    incrementLevel t = t{ level = t.level + 1 }
 
     go :: JCursor -> THMap -> TDMap -> Tuple THMap TDMap
 
     -- bottom cases
 
+    -- JCursor terminating with a Field
     go (JField _ JCursorTop) thm tdm = let
-        
-        updateTH (TH t) = TH t
-          
-          { length      = t.length + 1
-          , uniformity  = uniform jp t.primType t.uniformity}
 
-        thm' = collect'  pureTH  updateTH thm
+        thm' = collect'  pureTH updateTH thm
         tdm' = collect' [pureTD] (\tds -> tds <> [pureTD]) tdm
 
       in Tuple thm' tdm'
 
-    go (JIndex 0 JCursorTop) thm tdm = Tuple thm 
-      $ collect' [pureTD] (\tds -> tds <> [pureTD]) tdm
+    -- JCursor terminating with an Array 
+    go (JIndex n JCursorTop) thm tdm = let 
 
-    go (JIndex n JCursorTop) thm tdm = let td' = newTD 0 n 0 jp in Tuple thm
-      $ collect' [td'] (\tds -> tds <> [td']) tdm 
+        thm' = collect' pureTH updateTH thm
+        t    = newTD 0 n 0 jp 
+        tdm' = collect' [t] (\tds -> tds <> [t]) tdm 
+
+      in Tuple thm' tdm'
 
     -- mid cases
 
-    go (JField _ jc) thm tdm = go jc thm tdm
+    go (JField _ jc) thm tdm = let
 
-    -- go (JIndex n jc) thm tdm = go 
+        x    = go jc thm tdm      
+        thm' = x # fst >>> collect'  pureTH (mapTH incrementLevel)
+        tdm' = x # snd >>> collect' [pureTD] \ts -> 
+          init ts <> [incrementLevel `mapTD` last ts]
+      
+      in Tuple thm' tdm'
+
+    go (JIndex n jc) thm tdm = let 
+
+        x = go jc thm tdm
+        updateTD t = t{ level = t.level + 1, index = n }
+        tdm' = x # snd >>> collect' [pureTD] \ts ->
+          init ts <> [updateTD `mapTD` last ts]
+
+      in Tuple thm tdm'
+
+
+
+
+
+
+
+
+
+
+

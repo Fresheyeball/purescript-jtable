@@ -38,6 +38,9 @@ unwrapTH f (TH         {level = l, depth = d, length = l', primType = pt, unifor
 unwrapTD :: forall a.  (Level ->   Index ->   Height ->   JsonPrim -> a) -> TD -> a
 unwrapTD f (TD         {level = l, index = i, height = h, value = v}) = f l i h v
 
+mapTH f (TH x) = TH (f x)
+mapTD f (TD x) = TD (f x)
+
 instance showTH :: Show TH where
   show (TH th) = "TH { level : "      <> show th.level
                  <> ", depth : "      <> show th.depth
