@@ -81,8 +81,6 @@ sortToMaps = foldr f emptyZipper
 
     go :: JCursor -> THMap -> TDMap -> Tuple THMap TDMap
 
-    -- bottom cases
-
     -- JCursor terminating with a Field
     go (JField _ JCursorTop) thm tdm = let
 
@@ -95,12 +93,10 @@ sortToMaps = foldr f emptyZipper
     go (JIndex n JCursorTop) thm tdm = let 
 
         thm' = collect' pureTH updateTH thm
-        t    = newTD 0 n 0 jp 
+        t    = newTD 0 n 0 jp
         tdm' = collect' [t] (\tds -> tds <> [t]) tdm 
 
       in Tuple thm' tdm'
-
-    -- mid cases
 
     go (JField _ jc) thm tdm = let
 
@@ -113,11 +109,10 @@ sortToMaps = foldr f emptyZipper
 
     go (JIndex n jc) thm tdm = let 
 
-        x = go jc thm tdm
+        x          = go jc thm tdm
         updateTD t = t{ level = t.level + 1, index = n }
-        tdm' = x # snd >>> collect' [pureTD] \ts ->
+        tdm'       = x # snd >>> collect' [pureTD] \ts ->
           init ts <> [updateTD `mapTD` last ts]
 
-      in Tuple thm tdm'
+      in Tuple (fst x) tdm'
 
-      
