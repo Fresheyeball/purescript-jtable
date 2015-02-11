@@ -7,7 +7,7 @@ import Data.Argonaut
 import Data.Either
 import Data.Tuple
 import Data.Map
-import Data.Foldable (foldr, mconcat)
+import Data.Foldable (foldr, mconcat, foldMap)
 import Data.Array.Unsafe
 import Text.Smolder.Markup
 import Text.Smolder.HTML (td,tr,th,thead,tbody,table)
@@ -119,9 +119,7 @@ sortToMaps = foldr f emptyZipper
       in Tuple thm' tdm'
 
 markit :: Row -> Markup
-markit [ts] = tr <<< mconcat
-            $ (\(Tuple s n) -> th ! colspan (show n) $ text s) <$> ts
-markit (ts:tss) = markit [ts] <> markit tss
+markit = foldMap $ tr <<< mconcat <<< (<$>) (\(Tuple s n) -> th ! colspan (show n) $ text s)
 
 buildHeader :: THMap -> Row
 buildHeader thm = foldr go [[]] $ toList thm
