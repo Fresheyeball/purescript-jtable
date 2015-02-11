@@ -4,6 +4,7 @@ import Text.Smolder.Markup
 import Data.Argonaut.JCursor
 import Data.Argonaut
 import Data.Map
+import Data.Tuple
 
 type Level    = Number
 type Index    = Number
@@ -54,7 +55,7 @@ instance showTD :: Show TD where
                  <> ", height : "     <> show td.height
                  <> ", value : "      <> show td.value <> " }"
 
-type Row    = [[Markup]]
+type Row    = [[Tuple String Number]]
 
 data Uniformity = Heterogeneous | Homogeneous
 

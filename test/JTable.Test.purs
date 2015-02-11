@@ -53,47 +53,47 @@ stringCursor (JIndex i jc) = "JIndex " <> show i <> " (" <> stringCursor jc <> "
 
 checkNormalizeJCursor :: JCursor -> Result
 checkNormalizeJCursor jc =
-  
-  check (normalizeCursor jc) 
+
+  check (normalizeCursor jc)
 
   <?> "Normalize JCursor: " <> stringCursor jc
-  
+
   where
-  
+
   check JCursorTop     = true
   check (JField _ jc') = check jc'
   check (JIndex _ _  ) = false
 
 -- TODO: Refactor to be more pure
 checkCollect :: [Tuple JCursor TH] -> Result
-checkCollect x = xs == xs' 
+checkCollect x = xs == xs'
 
   <?> "Check Collect: " <> show x   <> "\n"
   <>  "xs:            " <> show xs  <> "\n"
   <>  "xs':           " <> show xs' <> "\n"
-  
-  where 
-  
-  xs  = sort <<< keys 
+
+  where
+
+  xs  = sort <<< keys
       $ foldr (flip (uncurry $ normalizeCursor >>> collect) id) (empty :: THMap) x
-  xs' = sort <<< nub  
+  xs' = sort <<< nub
       $ normalizeCursor <<< fst <$> x
 
 checkUniform :: JsonPrim -> JsonPrim -> JsonPrim -> Result
-checkUniform jp jp' jp'' = let 
-    
+checkUniform jp jp' jp'' = let
+
   uniform' z (Tuple pt u) = Tuple pt (uniform z pt u)
 
   p = Tuple (testPrim jp) Homogeneous
 
   homo      = snd $ foldr uniform' p [ jp, jp,  jp   ]
   hetro     = snd $ foldr uniform' p [ jp, jp', jp'' ]
-  arbHetro  = let 
+  arbHetro  = let
 
     a = testPrim jp
     b = testPrim jp'
-    c = testPrim jp''   
-    
+    c = testPrim jp''
+
     in   a /= b   ||   b /= c   ||   c /= a
 
   in (homo == Homogeneous &&
@@ -103,6 +103,10 @@ checkUniform jp jp' jp'' = let
     <>  "->       " <> show jp'  <> "\n"
     <>  "->       " <> show jp'' <> "\n"
 
+-- checkMarkit :: [[Tuple String Number]] -> Result
+-- checkMarkit (ts:tss) =
+
+
 -- murf = section "murf" *> case jsonParser sampleJson of
 --   Right x -> x # toPrims >>> foldr collect empty >>> print
 
@@ -110,15 +114,20 @@ regDefault = {global : true, ignoreCase : false, multiline : true, sticky : fals
 
 matchIt s = replace $ regex s regDefault
 
-prettyPrint :: forall a e. (Show a) => a -> Control.Monad.Eff.Eff 
+dummyTHM :: THMap
+dummyTHM = insert (JField "foo" JCursorTop) (newTH 1 1 1 1 Homogeneous)
+         $ insert (JField "baz" JCursorTop) (newTH 1 1 1 1 Homogeneous)
+         $ empty
+
+prettyPrint :: forall a e. (Show a) => a -> Control.Monad.Eff.Eff
   ( trace  :: Trace
   , err    :: Control.Monad.Eff.Exception.Exception
   , random :: Control.Monad.Eff.Random.Random | e) Unit
-prettyPrint = show 
-  >>> matchIt "fromList \\[" "\n [" 
-  >>> matchIt ",Tuple" "\n, Tuple" 
+prettyPrint = show
+  >>> matchIt "fromList \\[" "\n ["
+  >>> matchIt ",Tuple" "\n, Tuple"
   >>> matchIt "\\(" "\t ("
-  >>> trace 
+  >>> trace
 
 init = do
 
@@ -135,4 +144,7 @@ init = do
 
   section "foobar"
 
-  prettyPrint $ sortToMaps <<< toPrims <$> jsonParser sampleJson
+  -- print $ markit [[Tuple "foo" 5, Tuple "bar" 4],[Tuple "baz" 1]]
+
+  dummyTHM # buildHeader >>> markit >>> print
+  --prettyPrint $ sortToMaps <<< toPrims <$> jsonParser sampleJson

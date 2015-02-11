@@ -11,6 +11,7 @@ import Data.Foldable (foldr, mconcat)
 import Data.Array.Unsafe
 import Text.Smolder.Markup
 import Text.Smolder.HTML (td,tr,th,thead,tbody,table)
+import Text.Smolder.HTML.Attributes (colspan)
 import Text.Smolder.Renderer.String (render)
 
 import Debug.Spy (spy)
@@ -116,3 +117,25 @@ sortToMaps = foldr f emptyZipper
           init ts <> [updateTD `mapTD` last ts]
 
       in Tuple thm' tdm'
+
+markit :: Row -> Markup
+markit [ts] = tr <<< mconcat
+            $ (\(Tuple s n) -> th ! colspan (show n) $ text s) <$> ts
+markit (ts:tss) = markit [ts] <> markit tss
+
+buildHeader :: THMap -> Row
+buildHeader thm = foldr go [[]] $ toList thm
+
+  where
+
+  go :: Tuple JCursor TH -> Row -> Row
+
+  go (Tuple (JField s JCursorTop) (TH t)) (xs:xss) = (Tuple s t.width : xs) : xss
+
+
+
+
+--  go :: Tuple JCursor TH -> Tuple String Number
+--  go (Tuple (JField s JCursorTop) (TH t)) =
+--    [th ! colspan t.width $ text s]
+--  go (Tuple (JField s jf) (TH t)) =
