@@ -14,7 +14,7 @@ import Text.Smolder.HTML (td,tr,th,thead,tbody,table)
 import Text.Smolder.Renderer.String (render)
 
 import Debug.Spy (spy)
-import JTable.Types 
+import JTable.Types
 
 normalizeCursor :: JCursor -> JCursor
 normalizeCursor jc = case jc of
@@ -32,7 +32,7 @@ testPrim = primToJson >>> t
   t jp | isNull    jp = 1
        | isString  jp = 2
        | isBoolean jp = 3
-       | isNumber  jp = 4  
+       | isNumber  jp = 4
 
 uniform :: JsonPrim -> PrimType -> Uniformity -> Uniformity
 uniform _ _ Heterogeneous = Heterogeneous
@@ -49,30 +49,30 @@ parseNRender x = renderJTable <$> jsonParser x
 collect :: forall a. JCursor -> a -> (a -> a) -> Map JCursor a -> Map JCursor a
 collect njc pu f tdm = if member njc            tdm
                        then alter ((<$>) f) njc tdm
-                       else insert njc pu       tdm       
+                       else insert njc pu       tdm
 
 sortToMaps :: [Tuple JCursor JsonPrim] -> Tuple THMap TDMap
 sortToMaps = foldr f emptyZipper
 
-  where 
+  where
 
   emptyZipper = Tuple ( empty :: THMap ) ( empty :: TDMap )
 
   f :: Tuple JCursor JsonPrim -> Tuple THMap TDMap -> Tuple THMap TDMap
   f (Tuple jc' jp) (Tuple thm' tdm') = go jc' thm' tdm'
 
-    where 
+    where
 
     collect' :: forall a. a -> (a -> a) -> Map JCursor a -> Map JCursor a
     collect' = jc' # normalizeCursor >>> collect
 
-    pureTD = newTD 1 1 1           jp              :: TD 
-    pureTH = newTH 1 1 1 (testPrim jp) Homogeneous :: TH 
+    pureTD = newTD 1 1 1           jp              :: TD
+    pureTH = newTH 1 1 1 (testPrim jp) Homogeneous :: TH
 
     primType = testPrim jp
 
-    updateTH :: TH -> TH 
-    updateTH (TH t) = TH t      
+    updateTH :: TH -> TH
+    updateTH (TH t) = TH t
       { length      = t.length + 1
       , uniformity  = uniform jp t.primType t.uniformity }
 
@@ -89,25 +89,25 @@ sortToMaps = foldr f emptyZipper
 
       in Tuple thm' tdm'
 
-    -- JCursor terminating with an Array 
-    go (JIndex n JCursorTop) thm tdm = let 
+    -- JCursor terminating with an Array
+    go (JIndex n JCursorTop) thm tdm = let
 
         thm' = collect' pureTH updateTH thm
         t    = newTD 0 n 0 jp
-        tdm' = collect' [t] (\tds -> tds <> [t]) tdm 
+        tdm' = collect' [t] (\tds -> tds <> [t]) tdm
 
       in Tuple thm' tdm'
 
     go (JField _ jc) thm tdm = let
 
-        x    = go jc thm tdm      
+        x    = go jc thm tdm
         thm' = x # fst >>> collect'  pureTH (mapTH incrementLevel)
-        tdm' = x # snd >>> collect' [pureTD] \ts -> 
+        tdm' = x # snd >>> collect' [pureTD] \ts ->
           init ts <> [incrementLevel `mapTD` last ts]
-      
+
       in Tuple thm' tdm'
 
-    go (JIndex n jc) thm tdm = let 
+    go (JIndex n jc) thm tdm = let
 
         x          = go jc thm tdm
         thm'       = fst x
@@ -116,12 +116,3 @@ sortToMaps = foldr f emptyZipper
           init ts <> [updateTD `mapTD` last ts]
 
       in Tuple thm' tdm'
-
-buildHeader :: THMap -> Markup
-buildHeader tdm = go $ toList tdm
-
-  where 
-
-  go :: Tuple JCursor TH -> 
-  go (Tuple (JField s JCursorTop) t) = s # text >>> td
-  

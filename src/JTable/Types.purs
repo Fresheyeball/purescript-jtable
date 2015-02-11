@@ -1,4 +1,4 @@
-module JTable.Types where 
+module JTable.Types where
 
 import Text.Smolder.Markup
 import Data.Argonaut.JCursor
@@ -7,33 +7,33 @@ import Data.Map
 
 type Level    = Number
 type Index    = Number
-type Depth    = Number
-type Length   = Number 
+type Width    = Number
+type Length   = Number
 type Height   = Number
 type PrimType = Number
 
 data TH = TH { level       :: Level
-             , depth       :: Depth
+             , width       :: Width
              , length      :: Length
              , primType    :: PrimType
              , uniformity  :: Uniformity }
 
 data TD = TD { level       :: Level
-             , index       :: Index             
+             , index       :: Index
              , height      :: Height
              , value       :: JsonPrim }
 
 type THMap = Map JCursor  TH
 type TDMap = Map JCursor [TD]
 
-newTH ::                Level ->   Depth ->   Length ->    PrimType ->    Uniformity -> TH 
-newTH l d l' pt u = TH {level : l, depth : d, length : l', primType : pt, uniformity : u}
+newTH ::                Level ->   Width ->   Length ->    PrimType ->    Uniformity -> TH
+newTH l w l' pt u = TH {level : l, width : w, length : l', primType : pt, uniformity : u}
 
 newTD ::                Level ->   Index ->   Height ->   JsonPrim -> TD
 newTD l i h v     = TD {level : l, index : i, height : h, value : v}
 
-unwrapTH :: forall a.  (Level ->   Depth ->   Length ->    PrimType ->    Uniformity -> a) -> TH -> a
-unwrapTH f (TH         {level = l, depth = d, length = l', primType = pt, uniformity = u}) = f l d l' pt u
+unwrapTH :: forall a.  (Level ->   Width ->   Length ->    PrimType ->    Uniformity -> a) -> TH -> a
+unwrapTH f (TH         {level = l, width = w, length = l', primType = pt, uniformity = u}) = f l w l' pt u
 
 unwrapTD :: forall a.  (Level ->   Index ->   Height ->   JsonPrim -> a) -> TD -> a
 unwrapTD f (TD         {level = l, index = i, height = h, value = v}) = f l i h v
@@ -43,7 +43,7 @@ mapTD f (TD x) = TD (f x)
 
 instance showTH :: Show TH where
   show (TH th) = "TH { level : "      <> show th.level
-                 <> ", depth : "      <> show th.depth
+                 <> ", width : "      <> show th.width
                  <> ", length : "     <> show th.length
                  <> ", primType : "   <> show th.primType
                  <> ", uniformity : " <> show th.uniformity <> " }"
@@ -60,9 +60,9 @@ data Uniformity = Heterogeneous | Homogeneous
 
 instance showUniformity :: Show Uniformity where
 
-  show Heterogeneous 
+  show Heterogeneous
     = "Heterogeneous"
-  show Homogeneous 
+  show Homogeneous
     = "Homogeneous"
 
 instance eqUniformity :: Eq Uniformity where
@@ -70,4 +70,4 @@ instance eqUniformity :: Eq Uniformity where
   (==) Homogeneous   Homogeneous   = true
   (==) Heterogeneous Heterogeneous = true
   (==) _ _ = false
-  (/=) x y = not $ x == y 
+  (/=) x y = not $ x == y
