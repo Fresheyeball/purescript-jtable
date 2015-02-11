@@ -118,8 +118,8 @@ sortToMaps = foldr f emptyZipper
 
       in Tuple thm' tdm'
 
-markit :: Row -> Markup
-markit = foldMap $ tr <<< mconcat <<< (<$>) (\(Tuple s n) -> th ! colspan (show n) $ text s)
+collapseRow :: (Markup -> Markup) -> Row -> Markup
+collapseRow t = foldMap $ tr <<< mconcat <<< (<$>) \(Tuple s n) -> t ! colspan (show n) $ text s
 
 buildHeader :: THMap -> Row
 buildHeader thm = foldr go [[]] $ toList thm

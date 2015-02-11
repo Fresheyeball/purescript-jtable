@@ -6,9 +6,13 @@ import Data.Argonaut.JCursor
 import Data.Either
 import Data.Map
 import Data.Tuple
-import Data.String.Regex (regex, replace)
-import Data.Foldable (foldr)
-import Data.Array (nub, sort)
+import Data.Maybe (fromMaybe)
+import Data.String.Regex (regex, replace, match)
+import Data.Foldable (foldr, all, mconcat)
+import Data.Array (nub, sort, length, filter)
+
+import Text.Smolder.HTML (th)
+import Text.Smolder.Renderer.String (render)
 
 import Test.StrongCheck
 import Test.QuickCheck.Tuple
@@ -103,16 +107,27 @@ checkUniform jp jp' jp'' = let
     <>  "->       " <> show jp'  <> "\n"
     <>  "->       " <> show jp'' <> "\n"
 
--- checkMarkit :: [[Tuple String Number]] -> Result
--- checkMarkit (ts:tss) =
+checkCollapseRow :: Row -> Result
+checkCollapseRow rss = let 
 
+    testR             = Data.String.Regex.test <<< regex'
+    rendered          = render $ collapseRow th rss
+    
+    checkLabel s      = testR  $ ">" <> s <> "</th>"
+    checkColspan n    = testR  $ "colspan=\"" <> show (n :: Number) <> "\"" 
 
--- murf = section "murf" *> case jsonParser sampleJson of
---   Right x -> x # toPrims >>> foldr collect empty >>> print
+    rowCount          = fromMaybe false $ (\ms -> (length $ filter ((>) 0 <<< length) rss) == length ms) 
+                     <$> match (regex' "<tr>") rendered
+    
+    check (Tuple s n) = (checkLabel) s rendered && checkColspan n rendered  
 
-regDefault = {global : true, ignoreCase : false, multiline : true, sticky : false, unicode : false}
+  in rss == [] || all ((==) 0 <<< length) rss || all check (mconcat rss) && rowCount
 
-matchIt s = replace $ regex s regDefault
+    <?> "CollapseRow: " <> show rss <> "\n"
+
+regex' = flip regex {global : true, ignoreCase : false, multiline : true, sticky : false, unicode : false}
+
+matchIt s = replace $ regex' s 
 
 dummyTHM :: THMap
 dummyTHM = insert (JField "foo" JCursorTop) (newTH 1 1 1 1 Homogeneous)
@@ -142,9 +157,10 @@ init = do
   trace "Uniformity"
   quickCheck checkUniform
 
+  trace "collapseRow"
+  quickCheck checkCollapseRow
+
   section "foobar"
 
-  -- print $ markit [[Tuple "foo" 5, Tuple "bar" 4],[Tuple "baz" 1]]
-
-  dummyTHM # buildHeader >>> markit >>> print
+  dummyTHM # buildHeader >>> collapseRow th >>> print
   --prettyPrint $ sortToMaps <<< toPrims <$> jsonParser sampleJson
