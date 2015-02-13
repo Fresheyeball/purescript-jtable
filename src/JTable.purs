@@ -26,9 +26,8 @@ collect b a f mba = if member b            mba
                     then alter ((<$>) f) b mba
                     else insert b a        mba
 
--- 
-updateWith :: forall a. (Eq a) => (a -> Boolean) -> (a -> a) -> a -> (a -> [a] -> [a]) -> [a] -> [a]
-updateWith lookingFor ifFound default placeAt xs' = let 
+updateWith :: forall a. (a -> Boolean) -> (a -> a) -> a -> (a -> [a] -> [a]) -> [a] -> [a]
+updateWith lookingFor ifFound  default placeAt xs' = let 
     f = flip foldr (Tuple [] false) \x (Tuple xs b) -> 
       if lookingFor x then Tuple (ifFound x : xs) true else Tuple (x:xs) b
   in case f xs' of Tuple xs b -> if b then xs else default `placeAt` xs  

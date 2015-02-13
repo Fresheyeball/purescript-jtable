@@ -83,8 +83,8 @@ checkCollect x = xs == xs'
   xs' = sort <<< nub
       $ normalizeCursor <<< fst <$> x
 
-checkUniform :: JsonPrim -> JsonPrim -> JsonPrim -> Result
-checkUniform jp jp' jp'' = let
+checkUniformWithPrims :: JsonPrim -> JsonPrim -> JsonPrim -> Result
+checkUniformWithPrims jp jp' jp'' = let
 
   uniform' z (Tuple pt u) = Tuple pt (uniform z pt u)
 
@@ -131,6 +131,20 @@ checkCollapseRow rss' = let
     <?> "CollapseRow:  " <> show rss <> "\n"
     <>  "rendered:     " <> rendered <> "\n"
 
+checkUpdateWith :: Number -> Number -> Number -> Number -> Result
+checkUpdateWith w x y z = let 
+
+    u = updateWith ((==) w) ((+) x) y (:)
+
+  in   u [y,w,z] == [y, (w + x), z]
+    && u [x,z]   == [y,x,z]
+    && u [w,w,w] == [(w + x), (w + x), (w + x)]
+
+    <?> "checkUpdateWith: " <> show w <> ", " 
+                            <> show x <> ", " 
+                            <> show y <> ", " 
+                            <> show z <> "\n"
+
 regex' = flip regex {global : true, ignoreCase : false, multiline : true, sticky : false, unicode : false}
 
 prettyPrint :: forall a e. (Show a) => a -> Control.Monad.Eff.Eff
@@ -154,11 +168,14 @@ init = do
   trace "Collect to Map"
   quickCheck checkCollect
 
-  trace "Uniformity"
-  quickCheck checkUniform
+  trace "Uniformity of JsonPrims"
+  quickCheck checkUniformWithPrims
 
   trace "CollapseRow"
   quickCheck checkCollapseRow
+
+  trace "CheckUpdateWith"
+  quickCheck checkUpdateWith  
 
   section "foobar"
 
