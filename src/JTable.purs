@@ -144,8 +144,8 @@ buildHeader = collapseRow th <<< values <<< snd <<< foldr go a <<< toList
   go (Tuple (JField s JCursorTop) (TH t)) (Tuple _ tm) = 
     let n = Tuple s t.width in Tuple 1 $ collect 0 [n] ((:) n) tm
 
-  -- go (Tuple (JField s jc) th@(TH t)) tup = case go (Tuple jc th) tup of 
-  --   Tuple i tm -> let 
-  --       n    = Tuple s t.width
-  --       find ((==) s <<< fst) xs
-  --     in Tuple (i + 1) $ collect i [n] ((:) n) tm
+  go (Tuple (JField s jc) th@(TH {width = w})) tup = case go (Tuple jc th) tup of 
+    Tuple i tm -> let 
+        n = Tuple s w
+        u = updateWith (fst >>> (==) s) ((<$>) ((+) w)) n (:) 
+      in Tuple (i + 1) $ collect i [n] u tm
